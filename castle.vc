@@ -1,0 +1,237 @@
+void start()
+{
+	int alea, rhac;
+	int luc;
+	int dec;
+	
+	MapMusicSwitch("flashback.xm");
+	
+	if(nFlags[15])
+	{
+		sSceneName = "Inside the castle walls";
+		
+		nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+		SetPlayer(nPlayerEnt);
+		Warp(charx, chary);
+		
+		alea=EntitySpawn(44, 45, "alea.chr");
+		
+		if(nFlags[21])
+		{
+			if(nFlags[10])
+			{
+				TextBox(BatChars[2].sName + ": Well... he diverted them.");
+				TextBox(BatChars[0].sName + ": I wonder if the guards beat him up yet.");
+				//Rhac reappears next to them
+				rhac = EntitySpawn(38, 45, "rach.chr");
+				entity.face[nPlayerEnt] = 3;
+				entity.face[alea] = 3;
+				entity.face[rhac] = 4;
+				TextBox(BatChars[1].sName + ": You may enter the palace. *chuckle*");
+				TextBox(BatChars[2].sName + ": Something tells me " + BatChars[0].sName + ", that you are the only one that gets beaten up.");
+				
+				entitymove(alea, "D2L2");
+				entitymove(rhac, "D2R4");
+				
+				while(entity.movecode[alea] || entity.movecode[rhac])
+				{
+					Render();
+					ShowPage();
+				}
+				
+				entity.x[alea] = 0;
+				entity.y[alea] = 0;
+				entity.x[rhac] = 0;
+				entity.y[rhac] = 0;
+			}
+			else if(nFlags[11])
+			{
+//				SetEntitiesPaused(1);
+				TextBox(BatChars[0].sName + ": *cough cough*");
+				TextBox(BatChars[2].sName + ": *cough cough*");
+				//Toldur jumps out from behind a wall
+				rhac = EntitySpawn(38, 45, "toldur.chr");
+				entity.face[nPlayerEnt] = 3;
+				entity.face[alea] = 3;
+				entity.face[rhac] = 4;
+				TextBox(BatChars[3].sName + ": My comrades, we have infiltrated the castle. Quickly, we must find our bovine brothers.");
+				TextBox(BatChars[0].sName + ": *wheeze cough cough*");
+				TextBox(BatChars[2].sName + ": *cough wheeze cough*");
+				//SetEntitiesPaused(0);
+
+				entitymove(alea, "D2L2");
+				entitymove(rhac, "D2R4");
+				
+				while(entity.movecode[alea] || entity.movecode[rhac])
+				{
+					Render();
+					ShowPage();
+				}
+				
+				entity.x[alea] = 0;
+				entity.y[alea] = 0;
+				entity.x[rhac] = 0;
+				entity.y[rhac] = 0;
+			}
+		}
+	}
+	else
+	{
+		Render();
+		FadeIn(50);
+		//we are in a flash back
+		cameratracking=0;
+		xwin=32*16;
+		ywin=18*16;
+		
+		HookRetrace("GreyFilter");
+
+		//spawn keadik
+		entity.face[EntitySpawn(39,28,"thush.chr")]=1;
+		
+		//spawn thoush
+		entity.face[EntitySpawn(44, 28,"thush.chr")]=1;
+		
+		Render();
+		
+		//SetEntitiesPaused(1);
+		TextBox("King: The empire of the northern continent is growing so quickly. If they were to invade Drolith we would not have sufficient funds or soldiers to defend the Kingdom.");
+		TextBox("King: The numerous villages to the west have no formal militia and contain ample able bodied men to bolster the ranks.");
+		TextBox("King: If I were to control both the eastern and the western ports all trade into the continent would have to come through me.");
+		TextBox("Keadik: My liege, the population of these villages far outweighs our own kingdom let alone the army, any attack we send would be overrun.");
+		TextBox("King: You doubt my tactical abilities, but you are forgiven. Those men are scattered and wild... we will easily defeat them one by one. They can't possibly raise a significant opposition against our Knights.");
+		TextBox(BatChars[0].sName + ": Sire, I strongly advise against such a blatant assault on these people. Scattered they may be now, but given a common foe they may band together.");
+		TextBox("King: Do my ears deceive me or am I besieged by treason on either side of me? I have considered your counsel and I find it ill founded.");
+		TextBox("King: "  + BatChars[0].sName + " you shall lead the troops come day break and Keadik you shall accompany him. Prepare your men!");
+//		SetEntitiesPaused(0);
+		nFlags[16] = 1;
+		HookRetrace("");
+		Goto(charx, chary, "drolith.map");
+	}
+}
+
+void GreyFilter()
+{
+	ColorFilter(CF_GREY, screen);
+	ShowPage();
+}
+
+void Leave()
+{
+	//SetEntitiesPaused(1);
+	TextBox(BatChars[0].sName + ": We just got in, can't leave until we find where the cows are.");
+	//SetEntitiesPaused(0);
+
+	EntityMove(nPlayerEnt, "U1");
+	while(entity.movecode[nPlayerEnt])
+	{
+		Render();
+		ShowPage();
+	}
+
+	//Goto(541, 571, "drolith.map");
+}
+
+void TalkGuard()
+{
+	//SetEntitiesPaused(1);
+	TextBox("Guard: ...");
+	//SetEntitiesPaused(0);
+}
+
+void TalkKing()
+{
+	//MUAHAHAHA THIS FUNCTION ISN'T CALLED
+	//I LEFT IT IN AND EVEN LEVT THE EVENT IN THE MAP
+	//SO YOU IF CHEAT HARD ENOUGH YOU CAN TRIGGER IT
+	TextBox("King: Off with your head!");
+	TextBox(BatChars[0].sName + ": Your an idiot");
+	if(nFlags[10])
+
+	{
+		TextBox(BatChars[1].sName + ": Yessss....my......pressious......");
+	}
+	else if(nFlags[11])
+	{
+		TextBox(BatChars[3].sName + ": To the bovines!");
+	}
+	TextBox(BatChars[2].sName + ": ....... your all idiots");
+}
+
+void KingsRoom()
+{
+	//SetEntitiesPaused(1);
+	TextBox(BatChars[0].sName + ": This is a bad idea, we shouldn't be approaching the King's private quarters.");
+	Wait(100);
+	TextBox(BatChars[2].sName + ": It's locked.");
+	TextBox("Guards: Halt intruders!");
+	//SetEntitiesPaused(0);
+	//guards run in and take party to jail
+	Goto(25, 29, "jail.map");
+}
+
+void KeadiksRoom()
+{
+	Warp(85, 115);
+}
+
+void LeaveKeadiksRoom()
+{
+	Warp(233, 282);
+}
+
+void TalkKeadik()
+{
+	//SetEntitiesPaused(1);
+	TextBox(BatChars[0].sName + ": Keadik? Keadik it's me. We need your help.");
+	TextBox("Keadik: What? I do not personally know any herder simpleton or his oddball companions.");
+	TextBox(BatChars[0].sName + ": It's me " + BatChars[0].sName + "!");
+	TextBox("Keadik: Do not insult an honorable name! He was a strong warrior and worthy of better memory than your tarnishing. Guards take them away!");
+	//SetEntitiesPaused(0);
+	//guards run in and take party to jail
+	Goto(25, 29, "jail.map");
+}
+
+void EnterChamber()
+{
+	//SetEntitiesPaused(1);
+	TextBox(BatChars[2].sName + ": Isn't this where the King sits?");
+	TextBox("Guards: Halt! Noone approaches the King!");
+	TextBox(BatChars[1].sName + ": Yes.");
+	//SetEntitiesPaused(0);
+	//guards run in and take party to jail
+	Goto(25, 29, "jail.map");
+}
+
+void Observation()
+{
+	if(!nFlags[33])
+	{
+		//Walk into the castle
+		//SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": Don't you find it odd that none of the guards seem to mind that we're in here?");
+		TextBox(BatChars[0].sName + ": Yes. If this was my command we'd have to fight our way through or at least stare menacingly.");
+		//SetEntitiesPaused(0);
+		nFlags[33] = 1;
+	}
+}
+
+void ToFloor0A()
+{
+	Warp(103, 22);
+}
+
+void ToFloor0B()
+{
+	Warp(86, 22);
+}
+
+void ToFloor1A()
+{
+	Warp(57, 44);
+}
+
+void ToFloor1B()
+{
+	Warp(26, 44);
+}

@@ -1,0 +1,178 @@
+Entrance to Drolith
+
+Thoush: Drolith... (Flash back ensues)
+
+King: The empire of the northern continent is growing so quickly. If they were to invade Drolith we would not have sufficient funds or soldiers to defend the Kingdom.
+King: The numerous villages to the east have no formal militia and contain ample able bodied men to bolster the ranks.
+King: If I were to control both the eastern and the western ports all trade into the continent would have to come through me.
+Keadik: My liege, the population of these villages far outweighs our own kingdom let alone the army, any attack we send would be overrun.
+King: You doubt my tactical abilities, but you are forgiven. Those men are scattered and wild... we will easily defeat them one by one. They can't possibly raise a significant opposition against our Knights.
+Thoush: Sire, I strongly advise against such a blatant assault on these people. Scattered they may be now, but given a common foe they may band together.
+King: Do my ears deceive me or am I besieged by treason on either side of me? I have considered your counsel and I find it ill founded. Thoush you shall lead the troops come day break and Keadik you shall accompany him. Prepare your men!
+
+(Flash back ends and Thoush continues into Drolith)
+
+Alea: Come on Thoush, we should stop by the Police Station first.
+
+****************************
+Drolith Proper (Shop, Houses & Walkers)
+
+Shopkeeper: Welcome! Feel free to browse at any of my merchandise.
+
+Walker 1: Enjoy your stay in Drolith!
+Walker 2: I miss the good old days of this city.
+Walker 3: I feel like I remember you from somewhere. Have we met before?
+
+House 1: Life was easier before the northerners started snatching up all the land. If this keeps up my son will have to move back in with me.
+House 2: I've lived in this city all my life. And so help me, my children and their children will live and die here too.
+House 3: What can I say? If you've seen one city you've seen them all. And this one isn't so bad to live in.
+
+(After exiting police station if you haven't already visited the restaurant or magic guild)
+Thoush: I'm hungry.
+Alea: I wanna check out the magic guild.
+(If you approach the castle before either place)
+Thoush: I'm still hungry.
+Alea: The Mage Guild might have some magic beans that we could trade for a cow.
+
+(Approaching the castle without third character)
+Guard: Halt!
+Alea: Why hello there, we were wondering if...
+Guard: You may not pass!
+Alea: But I-
+Guard: You may not pass!
+Thoush: Let me handle this... Look here you Buckingham palace guard wanna be-
+Guard: You may not pass!
+Thoush: Do you have any idea who you are talking to?
+Guard: You may not pass!
+Thoush: That's it! *WAP* (punches guard, several more guards smack him back down)
+Thoush: Ok... so we can't pass...
+Alea: We're going to need someone to create a diversion while we sneak inside.
+
+(Approaching the castle with Rhac)
+Guard: Halt!
+Rhac: Halt!
+Guard: You may not pass!
+Rhac: You may not pass!
+(Another guard walks up)
+Guard: You may not pass!
+Rhac: You may not pass!
+(Another guard walks up)
+Guard: You may not pass!
+Rhac: You may not pass!
+(Thoush and Alea sneak past the guards and enter the castle)
+Alea: Well... he diverted them.
+Thoush: I wonder if the guards beat him up yet.
+(Rhac reappears next to them)
+Rhac: You may enter the palace. *chuckle*
+Alea: Something tells me Thoush, that you are the only one that gets beaten up.
+
+(Approaching the castle with Toldur)
+Guard: Halt!
+Toldur: You block the way yet we must pass.
+Guard: You may not pass!
+Toldur: Say what you will, for you shall no longer. Go my pretty.
+Guard: You may not- Aww what a cute black and white stripped kitty.
+(Big green gas cloud explodes over them)
+(Thoush and Alea sneak past the guards and enter the castle)
+Thoush: *cough cough*
+Alea: *cough cough*
+(Toldur jumps out from behind a wall)
+Toldur: My comrades, we have infiltrated the castle. Come we must quickly find our bovine brothers.
+Thoush: *wheeze cough cough*
+Alea: *cough wheeze cough*
+
+****************************
+Police Station
+Thoush: Hello, I would like to report a theft.
+Police guy 1: What's wrong, did you lose your way? *laugh*
+Thoush: ...
+Alea: No all of the cow herds have been stolen.
+Police guy 2: Hey that's a tough break.
+Thoush: I don't think you heard us correctly. ALL of the cow herds are missing. Without them the people of Lerang won't be able to feed themselves or even trade to get supplies.
+Police guy 2: I feel for you but what do you want me to do about it?
+Police guy 1: Yeah what do you want us to do? Walk around mooing until we find a clue?
+Thoush: Well that would be a start.
+Police guy 1: Hey are you getting an attitude with me?
+Alea: No, we're not... Could you at least start an investigation?
+Police guy 2: Yeah we'll fill out the paperwork.
+Thoush: Meaning?
+Police guy 1: Meaning we'll get right on it.
+
+(Our heroes step away from the station and speak to themselves)
+
+Thoush: Those jerks aren't going to do a thing.
+Alea: You're right, if anything is going to get done... we have to do it ourselves.
+
+(Police refuse to speak to our heroes anymore and they are free to exit the police station)
+
+****************************
+Magic Guild
+
+(When entering the guild)
+Alea: Well this guild is rather spartan.
+Thoush: Yes, Drolith never excelled in the mystical arts even in my day. Though the guild seems large enough to house at least a small number of magi.
+Alea: I guess I won't get much advice on enhancing my magical talents here. Oh I almost didn't notice, there's someone here.
+
+(First meeting)
+Rhac: No no no! You simply cannot compare the two samples. They differ too greatly in fundamental principle and the deviation from any testing would prove to be too wide to use for an experiment of any kind.
+Thoush & Alea: ...
+Rhac: Your point is well taken but the concept is incomprehensible; the reason is inconceivable; and my decision is irrevocable.
+Alea: Excuse me...
+Rhac: Hmm, oh we have visitors. Ah it has been so long since we had visitors. No no, nobody comes by to see us anymore. Yes that's right I have the study all to myself for my precious work.
+Thoush: Riiight. I can see you're obviously busy, so we'll just show ourselves the way out.
+Rhac: Don't go! I do so enjoy entertaining company.
+Alea: Please sir we must hurry along.
+Rhac: No! I'll go with you. I'll do anything you ask.
+Thoush: Anything? (Join Y/N)
+
+(Yes) Thoush: Welcome aboard.
+      Alea: Are you sure this is such a good idea?
+      Thoush: No, but at least next time we can send him to get beat up insted of me.
+(No) Thoush: Let's see... how do I put this?
+     Alea: Hey look over there! It's a random diversionary tactic!
+
+(Second meeting)
+Rhac: Will you take me with you? (Join Y/N)
+
+(Yes) Alea: Sure what's the worst that can happen?
+      Rhac: ...
+      Thoush: ...
+      Alea: Other than letting an obviously crazy man watch our backs?
+      Rhac: I'm not crazy. You're thinkng about the other guy.
+      Thoush: I am not even going to ask who he's talking about. But I am curious, what were you arguing over before?
+      Rhac: What else?
+      Rhac: Apples and Oranges.
+(No) Thoush: Do birds fly north for the winter?
+     Alea: Does a horse go "Bark bark"?
+     Thoush: Would a laden and an unladen sparrow fly at the same speed?
+     Alea: Would you let you go with you?
+     Rhac: Um... yes?
+****************************
+Restaurant
+
+(when speaking to barkeep)
+Thoush: Barkeep! I hunger, bring me mead and ale.
+Barkeep: Listen Olaf the Ogre, this ain't some country tavern. You show some respect when you order or you don't eat.
+Thoush: Oh, sorry. I'll have a grilled cheese sandwich and a glass of milk.
+Barkeep: I got your sandwich comin right up, but you're outta luck with the milk. We don't have any. Funny, you're the second person to come in here askin for some milk.
+
+(First meeting)
+Toldur: *Growls*
+Toldur: You stink of perfume and meat, still your hearts are in the right place. I will aid you to solve this mystery.
+(Join Y/N)
+
+(Yes) Thoush: Sure what's the worst that can happen?
+      (Nup pops up)
+      Nup: Hiya!
+      (Toldur immediately smashes it) *THWACK*
+      Alea: But... why?
+      Toldur: It bothered me.
+      Thoush: This looks like the start of a beautiful friendship.
+(No) Alea: Ah I think I got something in my eye, please excuse me while I visit the ladies' room. I'll be right back.
+     Thoush: Yeah and I um, have to uh feed my dog.
+
+(Second meeting)
+Toldur: You return. Have you come back to accept my aid? (Join Y/N)
+(Yes) Alea: Perhaps you may be useful, come walk with us.
+(No) Alea: No
+     Thoush: Nope

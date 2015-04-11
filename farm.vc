@@ -1,0 +1,300 @@
+void start()
+{
+	int luc;
+	int dec;
+	int endimg;
+	int x;
+
+	MapMusicSwitch("town.s3m");
+	
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+}
+
+void EnterPen()
+{
+	if(nFlags[0] == 0)
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": ....My cattle herd..........it's gone!");
+		TextBox(BatChars[0].sName + ": There's no hoof prints leading away, and the fence isn't broken. They must have been stolen, but theres no foot prints either. What's going on here...?");
+		TextBox(BatChars[0].sName + ": I should head to Lerang, someone there might have seen something.");
+//		SetEntitiesPaused(0);
+		
+		sSceneName = "The cows! They're gone!";
+		nFlags[0] = 1;
+	}
+}
+
+void Leave()
+{
+	if(!nFlags[0])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I should tend to the herd before I leave.");
+		entitymove(nPlayerEnt, "U1");
+//		SetEntitiesPaused(0);
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Goto(206, 161, "world.map");
+	}
+}
+
+void ExitHouse()
+{
+	Warp(103, 87);
+}
+
+void EnterHouse()
+{
+	Warp(182, 91);
+}
+
+void DownStairs()
+{
+	Warp(181, 122);
+}
+
+void UpStairs()
+{
+	Warp(189, 82);
+}
+
+void Chest1()
+{
+	//set the tile to the open chest tile
+	SetTile(event.tx, event.ty, 1, 179);
+	Render();
+	ShowPage();
+	if(!nFlags[1])
+	{
+		GetItem(0, 5);
+		nFlags[1] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 145);
+	Render();
+	ShowPage();
+}
+
+void Chest2()
+{
+	//set the tile to the open chest tile
+	SetTile(event.tx, event.ty, 1, 179);
+	Render();
+	ShowPage();
+	if(!nFlags[2])
+	{
+		GetItem(1, 1);
+		nFlags[2] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 145);
+	Render();
+	ShowPage();
+}
+
+void Chest3()
+{
+	//set the tile to the open chest tile
+	SetTile(event.tx, event.ty, 1, 179);
+	Render();
+	ShowPage();
+	if(!nFlags[3])
+	{
+		GetItem(3, 1);
+		GetItem(6, 1);
+		nFlags[3] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 145);
+	Render();
+	ShowPage();
+}
+
+void Chest4()
+{
+	//set the tile to the open chest tile
+	SetTile(event.tx, event.ty, 1, 179);
+	Render();
+	ShowPage();
+	if(!nFlags[4])
+	{
+		GetBling(100);
+		nFlags[4] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 145);
+	Render();
+	ShowPage();
+}
+
+void Chest5()
+{
+	//set the tile to the open chest tile
+	SetTile(event.tx, event.ty, 1, 179);
+	Render();
+	ShowPage();
+	if(!nFlags[5])
+	{
+		GetBling(50);
+		nFlags[5] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 145);
+	Render();
+	ShowPage();
+}
+
+void Bed()
+{
+	if(!nFlags[0])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I just got up, time to milk the cows.");
+//		SetEntitiesPaused(0);
+	}
+	else
+	{
+		FadeOut(50);
+		BatChars[nParty[0]].nHp = BatChars[nParty[0]].nMaxHp;
+		BatChars[nParty[1]].nHp = BatChars[nParty[1]].nMaxHp;
+		BatChars[nParty[2]].nHp = BatChars[nParty[2]].nMaxHp;
+		BatChars[nParty[0]].nMp = BatChars[nParty[0]].nMaxMp;
+		BatChars[nParty[1]].nMp = BatChars[nParty[1]].nMaxMp;
+		BatChars[nParty[2]].nMp = BatChars[nParty[2]].nMaxMp;
+		BatChars[nParty[0]].nDead = 0;
+		BatChars[nParty[1]].nDead = 0;
+		BatChars[nParty[2]].nDead = 0;
+		FadeIn(50);
+	}
+}
+
+void BookCase()
+{
+	string str2;
+
+	
+	if(nFlags[0])
+	{
+		str2 = "I should probably brush up on my fighting techniques before I leave.";
+		
+	}
+	else
+	{
+		str2 = "The cows can wait, and the books are always a good read.";
+	}
+	
+	if(TextBoxQuestion(BatChars[0].sName + ": I've got old books from my days as a soldier stacked up here.", str2, "", "", "Read?"))
+	{
+//		SetEntitiesPaused(1);
+		TextBox("How to use skills");
+		TextBox("All characters have skills. They can range from a magical attack for a mage a healing spell for a healer, or a special attack for a fighter.");
+		TextBox("All skills have there own experience and proficiency level. The proficiency level of a skill determines how effective it is when used in combat.");
+		TextBox("Having a higher proficiency makes the skill more effective. For example, a higher profeciency lets the heal spell recover more HP or grants the charge up skill to provide better endurance and strength.");
+		TextBox("All skills will gain experience every time they are used, but it is also possible to manually add experience to a skill you wish to raise. This is called exp dumping.");
+		TextBox("When exp is dumped into a skill the exp is taken from the characters 'exp to next level' and added to the skills 'exp to next level'. It is possible to use 50% of the characters exp per level toward skills.");
+		TextBox("Although it is not required to manually add exp to your skills, it can help improve a skill that is necessary but isn't use very often. It can also be used to raise a skill from a low proficiency to a proficiency level where it is suitable");
+//		SetEntitiesPaused(0);
+	}
+}
+
+void SEEKRIT()
+{
+	Warp(229, 95);
+}
+
+void LeveSEEKRIT()
+{
+	Warp(170, 122);
+}
+
+void Ness()
+{
+	TextBox("Ness: You have found the coder room in 'The Quest For Milk'! No go walk around and find all my stupid coder jokes and oddities that never made it into the game");
+}
+
+void PainGuy()
+{
+	if(TextBoxQuestion("Want me to hurt you?", "", "", "", "Pain?"))
+	{
+		BatChars[nParty[0]].nHp = 1;
+		BatChars[nParty[1]].nHp = 1;
+		BatChars[nParty[2]].nHp = 1;
+	}
+	
+	if(TextBoxQuestion("Want me to kill you?", "", "", "", "rm -r *?"))
+	{
+		BatChars[nParty[0]].nHp = 0;
+		BatChars[nParty[1]].nHp = 0;
+		BatChars[nParty[2]].nHp = 0;
+
+		BatChars[nParty[0]].nDead = 1;
+		BatChars[nParty[1]].nDead = 1;
+		BatChars[nParty[2]].nDead = 1;
+	}
+	
+	TextBox(BatChars[0].sName + ": Word...");
+	
+}
+
+void Blackbox()
+{
+	TextBox("Blackbox: This program has caused a fatial exception error. Press any key to cause a hard drive crash");
+	TextBox(BatChars[0].sName + ": Lets see what this so called button does");
+	//BOOM
+	RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), 0, screen);
+	ShowPage();
+	
+	SetSongPaused(nMapSong, 1);
+	
+	timer = 0;
+	
+	while(timer < 200)
+	{
+		ShowPage();
+	}
+	
+	Render();
+	ShowPage();
+	SetSongPaused(nMapSong, 0);
+	TextBox("Ahah gotcha");
+}
+
+void Chicken()
+{
+	PlaySound(nChickenSound, 100);
+	TextBox("Chicken!");
+}
+
+void Caca()
+{
+	TextBox(BatChars[0].sName + ": I should probably refrain from steping in that in the future.");
+}
+
+void OldEq()
+{
+	TextBox(BatChars[0].sName + ": Thats my equipment from my old days as a soldier. I should probably leave it alone.");
+}

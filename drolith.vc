@@ -1,0 +1,722 @@
+void start()
+{
+	int luc;
+	int dec;
+
+	MapMusicSwitch("flashback.xm");
+	
+	if(nFlags[16])
+	{
+		cameratracking=1;
+		
+		nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+		SetPlayer(nPlayerEnt);
+		Warp(charx, chary);
+
+		//castle flashback over, just finish it up here
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": Come on " + BatChars[0].sName + ", we should stop by the Police Station first.");
+//		SetEntitiesPaused(0);
+		nFlags[16] = 0;
+		nFlags[15] = 1;
+	}
+	else
+	{
+		if(nFlags[15])
+		{
+			nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+			SetPlayer(nPlayerEnt);
+			Warp(charx, chary);
+		}
+		else
+		{
+			sSceneName = "Drolith, striped of its glory";
+			//I'm like discount flashback warehouse
+			nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+			SetPlayer(nPlayerEnt);
+			Warp(charx, chary);
+
+			//SetEntitiesPaused(1);
+			TextBox(BatChars[0].sName + ": Drolith...");
+			//SetEntitiesPaused(0);
+
+			FadeOut(50);
+			map("castle.map");
+		}
+	}
+	
+	//hide rhac if you already got him
+	if(nFlags[10])
+	{
+		entity.x[7] = 0;
+		entity.y[7] = 0;
+	}
+	
+	//hide toldur if you got him
+
+	if(nFlags[11])
+	{
+		entity.x[6] = 0;
+		entity.y[6] = 0;
+	}
+}
+
+void SignPost()
+{
+//	SetEntitiesPaused(1);
+	TextBox("<- Residental -> Comercial ^  Castle");
+//	SetEntitiesPaused(0);
+}
+
+void Leave()
+{
+	Goto(254, 175, "world.map");
+}
+
+void GetRach()
+{
+	if(!nFlags[11])
+	{
+//		SetEntitiesPaused(1);
+		if(!nFlags[34])
+		{
+			TextBox(BatChars[1].sName + ": No no no! You simply cannot compare the two samples. They differ too greatly in fundamental principle and the deviation from any testing would prove to be too wide to use for an experiment of any kind.");
+			TextBox(BatChars[0].sName + " & " + BatChars[2].sName + ": ...");
+			TextBox(BatChars[1].sName + ": Your point is well taken but the concept is incomprehensible; the reason is inconceivable; and my decision is irrevocable.");
+			TextBox(BatChars[2].sName + ": Excuse me...");
+			TextBox(BatChars[1].sName + ": Hmm, oh we have visitors. Ah it has been so long since we had visitors. No no, nobody comes by to see us anymore. Yes that's right I have the study all to myself for my precious work.");
+			TextBox(BatChars[0].sName + ": Riiight. I can see you're obviously busy, so we'll just show ourselves the way out.");
+			TextBox(BatChars[1].sName + ": Don't go! I do so enjoy entertaining company.");
+			TextBox(BatChars[2].sName + ": Please sir we must hurry along.");
+			TextBox(BatChars[1].sName + ": No! I'll go with you. I'll do anything you ask.");
+			nFlags[34] = 1;
+		}
+
+		if(TextBoxQuestion(BatChars[0].sName + ": Anything?", "", "", "", "Join?"))
+		{
+			sSceneName = BatChars[1].sName + " the ...special mage";
+			
+			nParty[2] = 1;
+			nFlags[10] = 1;
+			
+			TextBox(BatChars[2].sName + ": Sure what's the worst that can happen?");
+			TextBox(BatChars[1].sName + ": ...");
+			TextBox(BatChars[0].sName + ": ...");
+			TextBox(BatChars[2].sName + ": Other than letting an obviously crazy man watch our backs?");
+			TextBox(BatChars[1].sName + ": I'm not crazy. You're thinkng about the other guy.");
+			TextBox(BatChars[0].sName + ": I am not even going to ask who he's talking about. But I am curious, what were you arguing over before?");
+			TextBox(BatChars[1].sName + ": What else?");
+			TextBox(BatChars[1].sName + ": Apples and Oranges.");
+
+			TextBox(BatChars[1].sName + " joined!");
+			entity.x[7] = 0;
+			entity.y[7] = 0;
+		}
+		else
+		{
+			TextBox(BatChars[0].sName + ": Let's see... how do I put this?");
+			TextBox(BatChars[2].sName + ": Hey look over there! It's a random diversionary tactic!");
+		}
+//		SetEntitiesPaused(0);
+	}
+	else
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[1].sName + ": You've come back to me!");
+		TextBox(BatChars[0].sName + ": No, no we haven't");
+//		SetEntitiesPaused(0);
+	}
+}
+
+void GetTouldur()
+{
+	if(!nFlags[10])
+	{
+//		SetEntitiesPaused(1);
+		if(!nFlags[35])
+		{
+			TextBox(BatChars[3].sName + ": ...");
+			nFlags[35] = 1;
+		}
+		
+		if(TextBoxQuestion(BatChars[3].sName + ": I will come with you if I must", "", "", "", "Join?"))
+		{
+			sSceneName = BatChars[3].sName + " wilderness man";
+			
+			nParty[2] = 3;
+			nFlags[11] = 1;
+
+			TextBox(BatChars[2].sName + ": Perhaps you may be useful, come walk with us.");
+			TextBox(BatChars[3].sName + " joined!");
+			
+			entity.x[6] = 0;
+			entity.y[6] = 0;
+		}
+		else
+		{
+			TextBox(BatChars[2].sName + ": No");
+			TextBox(BatChars[0].sName + ": Nope");
+		}
+//		SetEntitiesPaused(0);
+	}
+	else
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[3].sName + ": Your numbers are too many, I travel better alone.");
+//		SetEntitiesPaused(0);
+	}
+}
+
+void EnterItemShop()
+{
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Warp(204, 83);
+	}
+}
+
+void LeaveItemShop()
+{
+	Warp(112, 73);
+}
+
+void ActivateShop1()
+{
+	OpenShop(0, 1, 2, 0-1, 0-1);
+}
+
+void ActivateShop2()
+{
+	OpenShop(4, 10, 0-1, 0-1, 0-1);
+}
+
+void ActivateShop3()
+{
+	OpenShop(5, 6, 7, 8, 9);
+}
+
+void EnterHouse1()
+{
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Warp(264, 144);
+	}
+}
+
+void LeaveHouse1()
+{
+	Warp(94, 59);
+}
+
+void EnterRestaurant()
+{
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Warp(300, 92);
+		nFlags[19] = 1;
+	}
+}
+
+void LeaveRestaurant()
+{
+	Warp(89, 79);
+}
+
+void EnterPolice()
+{
+	Warp(237, 76);
+}
+
+void LeavePolice()
+{
+	Warp(117, 65);
+}
+
+void LeaveMagic()
+{
+	Warp(127, 73);
+}
+
+void EnterMagic()
+{
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Warp(216, 153);
+		
+		if(!nFlags[18])
+		{
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[2].sName + ": Well this guild is rather spartan.");
+			TextBox(BatChars[0].sName + ": Yes, Drolith never excelled in the mystical arts even in my day. Though the guild seems large enough to house at least a small number of magi.");
+			TextBox(BatChars[2].sName + ": I guess I won't get much advice on enhancing my magical talents here. Oh I almost didn't notice, there's someone here.");
+//			SetEntitiesPaused(0);
+			nFlags[18] = 1;
+		}
+	}
+}
+
+void EnterHouse2()
+{
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		Warp(751, 265);
+	}
+}
+
+void LeaveHouse2()
+{
+	Warp(512, 588);
+}
+
+void EnterCastle()
+{
+	int grd1, grd2, grd3;
+	int alea, rhac;
+	int cloud;
+	
+	if(!nFlags[20])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[2].sName + ": We should probably go to the police first");
+//		SetEntitiesPaused(0);
+		EntityMove(nPlayerEnt, "D1");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+		if(!nFlags[18])
+		{
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[2].sName + ": I wanna check out the magic guild.");
+//			SetEntitiesPaused(0);
+			EntityMove(nPlayerEnt, "D1");
+			while(entity.movecode[nPlayerEnt])
+			{
+				Render();
+				ShowPage();
+			}
+		}
+		else if(!nFlags[19])
+		{
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[0].sName + ": I'm still hungry.");
+//			SetEntitiesPaused(0);
+			EntityMove(nPlayerEnt, "D1");
+			while(entity.movecode[nPlayerEnt])
+			{
+				Render();
+				ShowPage();
+			}
+		}
+		else
+		{
+			//if you don't have the third char, don't go in
+			if(!nFlags[10] && !nFlags[11])
+			{
+//				SetEntitiesPaused(1);
+				TextBox("Guard: Halt!");
+				TextBox(BatChars[2].sName + ": Why hello there, we were wondering if...");
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[2].sName + ": But I-");
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[0].sName + ": Let me handle this... Look here you Buckingham palace guard wanna be-");
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[0].sName + ": Do you have any idea who you are talking to?");
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[0].sName + ": That's it! *WAP*");
+				//thoush being violent
+				TextBox(BatChars[0].sName + ": Ok... so we can't pass...");
+				TextBox(BatChars[2].sName + ": We're going to need someone to create a diversion while we sneak inside.");
+//				SetEntitiesPaused(0);
+				EntityMove(nPlayerEnt, "D1");
+				while(entity.movecode[nPlayerEnt])
+				{
+					Render();
+					ShowPage();
+				}
+			}
+			else if(nFlags[10])
+			{
+				entity.speed[nPlayerEnt] = 100;
+				rhac = entityspawn(entity.x[nPlayerEnt]/16, entity.y[nPlayerEnt]/16, "rach.chr");
+				alea = entityspawn(entity.x[nPlayerEnt]/16, entity.y[nPlayerEnt]/16, "alea.chr");
+
+				entitymove(alea, "D2R2");
+				entitymove(rhac, "D2L2");
+
+				while(entity.movecode[alea] && entity.movecode[rhac])
+				{
+					Render();
+					ShowPage();
+				}
+
+				entity.face[alea]=1;
+				entity.face[rhac]=1;
+
+				//Rhac messes with the guards
+//				SetEntitiesPaused(1);
+				TextBox("Guard: Halt!");
+				TextBox(BatChars[1].sName + ": Halt!");
+//				SetEntitiesPaused(0);
+				//entitymove(4, "L5");
+				//while(entity.movecode[4])
+				//{
+				//	Render();
+				//	ShowPage();
+				//}
+//				SetEntitiesPaused(1);
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[1].sName + ": You may not pass!");
+				//Another guard walks up
+				//grd1 = EntitySpawn(538, 567, "thush.chr");
+				//render();
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[1].sName + ": You may not pass!");
+				//Another guard walks up
+				//grd1 = EntitySpawn(540, 567, "thush.chr");
+				//render();
+				//TextBox("Guard: You may not pass!");
+				TextBox(BatChars[1].sName + ": You may not pass!");
+//				SetEntitiesPaused(0);
+				//Thoush and Alea sneak past the guards and enter the castle
+				entitymove(nPlayerEnt, "U2");
+				entitymove(alea, "U3");
+
+				while(entity.movecode[nPlayerEnt] && entity.movecode[alea])
+				{
+					Render();
+					ShowPage();
+				}
+
+				nFlags[21] = 1;
+				Goto(42, 47, "castle.map");
+			}
+			else if(nFlags[11])
+			{
+				entity.speed[nPlayerEnt] = 100;
+				rhac = entityspawn(entity.x[nPlayerEnt]/16, entity.y[nPlayerEnt]/16, "toldur.chr");
+				alea = entityspawn(entity.x[nPlayerEnt]/16, entity.y[nPlayerEnt]/16, "alea.chr");
+
+				entitymove(alea, "D2R2");
+				entitymove(rhac, "D2L2");
+
+				while(entity.movecode[alea] && entity.movecode[rhac])
+				{
+					Render();
+					ShowPage();
+				}
+
+				entity.face[alea]=1;
+				entity.face[rhac]=1;
+
+				//Touldur throws a skunk at the guards
+//				SetEntitiesPaused(1);
+				TextBox("Guard: Halt!");
+				TextBox(BatChars[3].sName + ": You block the way yet we must pass.",);
+				TextBox("Guard: You may not pass!");
+				TextBox(BatChars[3].sName + ": Say what you will, for you shall no longer. Go my pretty.");
+				TextBox("Guard: You may not- Aww what a cute black and white stripped kitty.");
+//				SetEntitiesPaused(0);
+				cloud = LoadImage("skunkcloud.png");
+				cameratracking=0;
+				//Big green gas cloud explodes over them
+				entitymove(nPlayerEnt, "U2");
+				entitymove(alea, "U3");
+
+				//Thoush and Alea sneak past the guards and enter the castle
+				while(entity.movecode[nPlayerEnt] && entity.movecode[alea])
+				{
+					Render();
+					SetLucent(20);
+					TBlit(70, 40, cloud, screen);
+					SetLucent(0);
+					ShowPage();
+				}
+
+				nFlags[21] = 1;
+				FreeImage(cloud);
+				cameratracking=1;
+				Goto(42, 47, "castle.map");
+			}
+		}
+	}
+}
+
+
+void TalkGuard()
+{
+//	SetEntitiesPaused(1);
+	TextBox("Guard: You may not pass!");
+//	SetEntitiesPaused(0);
+}
+
+void TalkCop()
+{
+	if(!nFlags[20])
+	{
+		sSceneName = "Cops are so useful";
+		
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": Hello, I would like to report a theft.");
+		TextBox("Biggs: What's wrong, did you lose your way?");
+		TextBox(BatChars[0].sName + ": ...");
+		TextBox(BatChars[2].sName + ": No all of the cow herds have been stolen.");
+		TextBox("Wedge: Hey that's a tough break.");
+		TextBox(BatChars[0].sName + ": I don't think you heard us correctly. ALL of the cow herds are missing. Without them the people of Lerang won't be able to feed themselves or even trade to get supplies.");
+		TextBox("Wedge: I feel for you but what do you want me to do about it?");
+		TextBox("Biggs: Yeah what do you want us to do? Walk around mooing until we find a clue?");
+		TextBox(BatChars[0].sName + ": Well that would be a start.");
+		TextBox("Biggs: Hey are you getting an attitude with me?");
+		TextBox(BatChars[2].sName + ": No, we're not... Could you at least start an investigation?");
+		TextBox("Wedge: Yeah we'll fill out the paperwork.");
+		TextBox(BatChars[0].sName + ": Meaning?");
+		TextBox("Biggs: Meaning we'll get right on it.");
+		
+//		SetEntitiesPaused(0);
+		//STEP BACK YOU FOOL
+		EntityMove(nPlayerEnt, "D2");
+		while(entity.movecode[nPlayerEnt])
+		{
+			Render();
+			ShowPage();
+		}
+//		SetEntitiesPaused(1);
+		
+		TextBox(BatChars[0].sName + ": Those jerks aren't going to do a thing.");
+		TextBox(BatChars[2].sName + ": You're right, if anything is going to get done... we have to do it ourselves.");
+//		SetEntitiesPaused(0);
+
+		nFlags[20] = 1;
+	}
+	else
+	{
+		TextBox("Wedge: What ... your still here?");
+	}
+}
+
+void Barkeep()
+{
+//	SetEntitiesPaused(1);
+	TextBox(BatChars[0].sName + ": Barkeep! I hunger, bring me mead and ale.");
+	TextBox("Barkeep: Listen Olaf the Ogre, this ain't some country tavern. You show some respect when you order or you don't eat.");
+	TextBox(BatChars[0].sName + ": Oh, sorry. I'll have a grilled cheese sandwich and a glass of milk.");
+	TextBox("Barkeep: I got your sandwich comin right up, but you're outta luck with the milk. We don't have any. Funny, you're the second person to come in here askin for some milk.");
+//	SetEntitiesPaused(0);
+}
+
+void House1()
+{
+//	SetEntitiesPaused(1);
+	TextBox("Life was easier before the northerners started snatching up all the land. If this keeps up my son will have to move back in with me.");
+//	SetEntitiesPaused(0);
+}
+
+void House2()
+{
+//	SetEntitiesPaused(1);
+	TextBox("I've lived in this city all my life. And so help me, my children and their children will live and die here too.");
+//	SetEntitiesPaused(0);
+}
+
+void House3()
+{
+//	SetEntitiesPaused(1);
+	TextBox("What can I say? If you've seen one city you've seen them all. And this one isn't so bad to live in.");
+//	SetEntitiesPaused(0);
+}
+
+void Walker1()
+{
+//	SetEntitiesPaused(1);
+	TextBox("Enjoy your stay in Drolith!");
+//	SetEntitiesPaused(0);
+}
+
+void Walker2()
+{
+//	SetEntitiesPaused(1);
+	TextBox("no dialog fo you!");
+
+	//TextBox("I miss the good old days of this city.");
+//	SetEntitiesPaused(0);
+}
+
+void Walker3()
+{
+//	SetEntitiesPaused(1);
+	TextBox("I feel like I remember you from somewhere. Have we met before?");
+//	SetEntitiesPaused(0);
+}
+
+void Table()
+{
+	nMenuCanOpen = 0;
+
+	EntityMove(10, "U4L7");
+	while(entity.movecode[10])
+	{
+		Render();
+		ShowPage();
+	}
+	
+//	SetEntitiesPaused(1);
+	TextBox("Hey! Stay out of that!....It's ......... Private!");
+//	SetEntitiesPaused(0);
+
+	EntityMove(10, "R7D4");
+	while(entity.movecode[10])
+	{
+		Render();
+		ShowPage();
+	}
+
+	nMenuCanOpen = 1;
+}
+
+void JailDoor()
+{
+//	SetEntitiesPaused(1);
+
+	TextBox("Biggs: Stay out of there, unless you want us to PUT you in there.");
+//	SetEntitiesPaused(0);
+}
+
+void SadClown()
+{
+//	SetEntitiesPaused(1);
+	TextBox("Like my performance? How about a donation?");
+
+	TextBox(BatChars[0].sName + ": Sorry....I have to go....place.");
+//	SetEntitiesPaused(0);
+}
+
+void SadClownKid()
+{
+//	SetEntitiesPaused(1);
+	TextBox("These guys suck ASS");
+//	SetEntitiesPaused(0);
+}
+
+void Server()
+{
+	TextBox("If you want to order something take a seat, or order at the bar.");
+}
+
+void Diner4()
+{
+	TextBox("All I want is to enjoy my meal without someone trying to start up a conversation with me. Is that to much to ask? ");
+}
+
+void DinerGroup()
+{
+	TextBox("I heard that weird things are going on in the castle.");
+	TextBox("Oh? Do tell...");
+	TextBox("Well you didn't hear it from me, but some kind of weird magical type person has been spotted around");
+	TextBox("Magical type person?");
+}
+
+void Diner3()
+{
+	TextBox("Come sit, share some of this with me");
+	TextBox(BatChars[2].sName + ": What is that?");
+	TextBox(BatChars[0].sName + ": Carrot crab cakes. It's a Drolithan delicacy.");
+	TextBox(Batchars[2].sName + ": But I've never sceen these carrots, where do they come from?");
+	TextBox(BatChars[0].sName + ": They come imported by sea from a farm way on the other side of the world");
+	TextBox("Ness: That was quite a treck to make a Sully reference wasn't it....");
+}
+
+void Kitchen()
+{
+	int steam;
+	int i;
+	int dist;
+	
+	steam = LoadImage("steam.png");
+	
+	SetTile(event.tx, event.ty, 1, 149);
+	SetTile(event.tx, event.ty-1, 1, 148);
+	
+	for(i=0;i<100;i++)
+	{
+		dist=i/3;
+		Render();
+		SetLucent(i);
+		TBlit((ImageWidth(screen)/2)+dist-(ImageWidth(steam)/2), (ImageHeight(screen)/2)+dist-ImageHeight(steam), steam, screen);
+		TBlit((ImageWidth(screen)/2)-(ImageWidth(steam)/2), (ImageHeight(screen)/2)+dist-ImageHeight(steam), steam, screen);
+		TBlit((ImageWidth(screen)/2)+dist-(ImageWidth(steam)/2), (ImageHeight(screen)/2)-ImageHeight(steam), steam, screen);		
+		SetLucent(0);
+		ShowPage();
+		wait(1);
+	}
+	
+	TextBox("Cook: I need more crab cakes!"); //CHANGE ME
+	
+	SetTile(event.tx, event.ty, 1, 109);
+	SetTile(event.tx, event.ty-1, 1, 108);
+	
+	FreeImage(steam);
+}

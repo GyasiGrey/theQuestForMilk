@@ -1,0 +1,165 @@
+void OpenShop(int itm1, int itm2, int itm3, int itm4, int itm5)
+{
+	int win = GenerateWindow(300, 200);
+	int miniwin = GenerateWindow(150, 50);
+	int pointerpos;
+
+	int done;
+	int numshopitems;
+	int itembought;
+	int itmpointingat;
+	
+	int itemindex;
+	
+
+	nMenuCanOpen=0;
+	
+	pointerpos=0;
+	
+	Render();
+
+
+	while(!done)
+	{
+		numshopitems=0;	
+		
+		Blit(100, 100, win, screen);
+		Blit(400, 250, miniwin, screen);
+		Blit(400, 200, miniwin, screen); //second miniwindow is for bling
+		
+		PrintString(415, 215, screen, nFont, "Bling:");
+		PrintString(475, 215, screen, nFont, str(nBling));
+		
+		PrintString(415, 265, screen, nFont, "Owned:");
+		
+		if(pointerpos == 0)
+		{
+			itmpointingat = itm1;
+		}
+		else if(pointerpos == 1)
+		{
+			itmpointingat = itm2;
+		}
+		else if(pointerpos == 2)
+		{
+			itmpointingat = itm3;
+		}
+		else if(pointerpos == 3)
+		{
+			itmpointingat = itm4;
+		}
+		else if(pointerpos == 4)
+		{
+			itmpointingat = itm5;
+		}
+		
+		itemindex = HasItem(itmpointingat);
+		if(itemindex >= 0)
+			PrintString(475, 265, screen, nFont, str(nItemCount[itemindex]));
+		else
+			PrintString(475, 265, screen, nFont, "0");
+		
+		if(itm1 >= 0)
+		{
+			PrintString(145, 115, screen, nFont, Items[itm1].sName);
+			PrintString(345, 115, screen, nFont, str(Items[itm1].nCost));
+			numshopitems++;
+		}
+		
+		if(itm2 >= 0)
+		{
+			PrintString(145, 130, screen, nFont, Items[itm2].sName);
+			PrintString(345, 130, screen, nFont, str(Items[itm2].nCost));
+			numshopitems++;
+		}
+		
+		if(itm3 >= 0)
+		{
+			PrintString(145, 145, screen, nFont, Items[itm3].sName);
+			PrintString(345, 145, screen, nFont, str(Items[itm3].nCost));
+			numshopitems++;
+		}
+		
+		if(itm4 >= 0)
+		{
+			PrintString(145, 160, screen, nFont, Items[itm4].sName);
+			PrintString(345, 160, screen, nFont, str(Items[itm4].nCost));
+			numshopitems++;
+		}
+		
+		if(itm5 >= 0)
+		{
+			PrintString(145, 175, screen, nFont, Items[itm5].sName);
+			PrintString(345, 175, screen, nFont, str(Items[itm5].nCost) + " bling");
+			numshopitems++;
+		}
+			
+		TBlit(110, 115+(15*pointerpos), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				playsound(nMenuMoveSound, 100);
+				unpress(5);
+			}
+		}
+		
+		if(down)
+		{
+			if(pointerpos < numshopitems-1)
+			{
+				pointerpos++;
+				playsound(nMenuMoveSound, 100);
+				unpress(6);
+			}
+		}
+		
+		if(b1)
+		{
+			if(pointerpos==0)
+				itembought=itm1;
+			if(pointerpos==1)
+				itembought=itm2;
+			if(pointerpos==2)
+				itembought=itm3;
+			if(pointerpos==3)
+				itembought=itm4;
+			if(pointerpos==4)
+				itembought=itm5;
+
+			//you know, I might just want to give itembought a value before I use it....
+			if(nBling >= Items[itembought].nCost)
+			{
+				playsound(nMenuClickSound, 100);
+				//show the "your sure you wanna buy this crap?" window
+				if(ChoiceMenu("Buy?", 150, 130))
+				{
+					//take the money
+					nBling -= Items[itembought].nCost;
+					//give me the item
+					GetItemNoText(itembought, 1);
+				}
+			}
+			else
+			{
+				//you ain't got no bling playa
+				PlaySound(nErrorSound, 100);
+			}
+			unpress(1);
+		}
+		
+		if(b2)
+		{
+			done=1;
+		}
+	}
+	
+	FreeImage(win);
+	FreeImage(miniwin);
+	
+	nMenuCanOpen=1;
+}

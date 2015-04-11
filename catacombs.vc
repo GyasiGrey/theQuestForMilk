@@ -1,0 +1,209 @@
+void Start()
+{
+	sSceneName = "Hunting for the Acolyte";
+	
+	MapMusicSwitch("catacombs.it");
+
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+	
+	nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	
+	//call all the switches twice to get all the obstructions in the right place
+	//call the innards of the functions so the sound dosen't get played 
+	//when you enter the place
+	MoveBridge(29, 34, 22);
+	MoveBridge(29, 34, 22);
+
+	MoveBridge(35, 37, 23);
+	MoveBridge(35, 37, 23);
+
+	MoveBridge(42, 40, 24);
+	MoveBridge(42, 40, 24);
+
+	MoveBridge(49, 42, 28);
+	MoveBridge(49, 42, 28);
+
+	MoveBridge(47, 38, 29);
+	MoveBridge(47, 38, 29);
+	
+}
+
+void Leave()
+{
+	TextBox(BatChars[0].sName + ": Not back that way, the guards will be after us!");
+	
+	EntityMove(nPlayerEnt, "R1");
+	
+	while(entity.movecode[nPlayerEnt])
+	{
+		Render();
+		ShowPage();
+	}
+}
+
+void MoveBridge(int x, int y, int flag)
+{
+	if(!nFlags[flag])
+	{
+		//tiles to add the bridge
+		SetTile(x-1, y, 2, 125);
+		SetTile(x, y, 2, 125);
+		SetTile(x+1, y, 2, 125);
+
+		//tiles to remove the bridge
+		SetTile(x, y-1, 2, 0);
+		SetTile(x, y+1, 2, 0);
+
+		//set the new obs
+		SetObs(x, y-1, 1);
+		SetObs(x, y+1, 1);
+
+		//remove the old obs
+		SetObs(x-1, y, 0);
+		SetObs(x+1, y, 0);
+
+		nFlags[flag] = 1;
+	}
+	else
+	{
+		//tiles to remove the bridge
+		SetTile(x-1, y, 2, 0);
+
+		SetTile(x+1, y, 2, 0);
+
+		//tiles to add the bridge
+		SetTile(x, y-1, 2, 123);
+		SetTile(x, y, 2, 123);
+		SetTile(x, y+1, 2, 123);
+
+		//set the old obs
+		SetObs(x-1, y, 1);
+		SetObs(x+1, y, 1);
+
+		//remove the new obs
+		SetObs(x, y-1, 0);
+		SetObs(x, y+1, 0);
+
+		nFlags[flag] = 0;
+	}
+}
+
+void Switch1()
+{
+	PlaySound(nSwitchSound, 100);
+	MoveBridge(29, 34, 22);
+}
+
+void Switch2()
+{
+	PlaySound(nSwitchSound, 100);
+	MoveBridge(35, 37, 23);
+}
+
+void Switch3()
+{
+	PlaySound(nSwitchSound, 100);
+	MoveBridge(42, 40, 24);
+}
+
+void Switch4()
+{
+	PlaySound(nSwitchSound, 100);
+	MoveBridge(49, 42, 28);
+}
+
+void Switch5()
+{
+	PlaySound(nSwitchSound, 100);
+	MoveBridge(47, 38, 29);
+}
+
+void Chamber()
+{
+	Goto(28, 23, "chamber.map");
+}
+
+void Battle()
+{
+	int rand;
+	
+	nBattleSteps--;
+	if(nBattleSteps<=0)
+	{
+		rand = Random(1, 100);
+		if(rand < 50)
+		{
+			if(StartBattle(13, 0-1, 13, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.s3m")!=0)
+			{
+				GameOver();
+			}
+		}
+		else
+		{
+			if(StartBattle(0-1, 12, 0-1, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.s3m")!=0)
+			{
+				GameOver();
+			}
+		}
+		nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	}
+}
+
+void Chest1()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[30])
+	{
+		GetItem(1, 1);
+		nFlags[30] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Chest2()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[31])
+	{
+		GetItem(1, 1);
+		nFlags[31] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Chest3()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[32])
+	{
+		GetItem(2, 1);
+		nFlags[32] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}

@@ -1,0 +1,1876 @@
+#define EQUIP_LIST_LEN 15
+
+//the bkg of the windows
+int nWindowBkg;
+
+int nMenuTopWindow;
+int nMenuBotWindow;
+int nMenuGoldWindow;
+
+int equiparray[MAX_ITEMS]; //the array of equipable items. global because VERGE CAN'T DO LOCAL ARRAYS
+int equiplen;
+
+int LoadMenu()
+{
+	int retval;
+	int done;
+	int win = GenerateWindow(350, 100);
+	int pointerpos;
+	
+	string name1 = GetSceneName(0);
+	string name2 = GetSceneName(1);
+	string name3 = GetSceneName(2);
+	
+	done=1;
+	pointerpos=0;
+
+	while(done)
+	{
+		Blit(300, 400, win, screen);
+		PrintString(315, 415, screen, nFont, "Choose a load location");
+		PrintString(325, 445, screen, nFont, "1 " + name1);
+		PrintString(325, 460, screen, nFont, "2 " + name2);
+		PrintString(325, 475, screen, nFont, "3 " + name3);
+		
+		//pointer
+		TBlit(305, 445+(15*pointerpos), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(down)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b1)
+		{
+			if(FileExists("save" + str(pointerpos) + ".sav"))
+			{
+				playsound(nMenuClickSound, 100);
+				if(ChoiceMenu("Load?", 475, 415))
+				{
+					LoadGame(pointerpos);
+					done=0;
+					retval=1;
+				}
+			}
+			else
+			{
+				playsound(nErrorSound, 100);
+			}
+			unpress(1);
+			Render();
+		}
+		
+		if(b2)
+		{
+			done=0;
+			retval=0;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(win);
+	return retval;
+}
+
+
+void SaveMenu()
+{
+	int done;
+	int win = GenerateWindow(350, 100);
+	int pointerpos;
+	
+	string name1 = GetSceneName(0);
+	string name2 = GetSceneName(1);
+	string name3 = GetSceneName(2);
+	
+	done=1;
+	pointerpos=0;
+
+	while(done)
+	{
+		Blit(300, 400, win, screen);
+		PrintString(315, 415, screen, nFont, "Choose a save location");
+		PrintString(325, 445, screen, nFont, "1 " + name1);
+		PrintString(325, 460, screen, nFont, "2 " + name2);
+		PrintString(325, 475, screen, nFont, "3 " + name3);
+		
+		//pointer
+		TBlit(305, 445+(15*pointerpos), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(down)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b1)
+		{
+			playsound(nMenuClickSound, 100);
+			if(ChoiceMenu("Save?", 500, 350))
+			{
+				SaveGame(pointerpos);
+				done=0;
+			}
+			unpress(1);
+			Render();
+			DrawMainMenu();
+		}
+		
+		if(b2)
+		{
+			done=0;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(win);
+}
+
+//returns 1 if the user chose yes
+//else returns 0
+int ChoiceMenu(string text, int x, int y)
+{
+	int retval;
+	int done;
+	int win = GenerateWindow(125, 75);
+	int pointerpos;
+	
+	unpress(1);
+
+	
+	done=1;
+	pointerpos=0;
+
+	while(done)
+	{
+		Blit(x, y, win, screen);
+		PrintString(x+15, y+15, screen, nFont, text);
+		PrintString(x+35, y+45, screen, nFont, "No");
+		PrintString(x+85, y+45, screen, nFont, "Yes");
+		
+		//pointer
+		TBlit((x+10)+(50*pointerpos), y+45, nPointer, screen);
+		
+		ShowPage();
+		
+		if(right && pointerpos==0)
+		{
+			pointerpos=1;
+			unpress(8);
+			playsound(nMenuMoveSound, 100);
+		}
+
+		if(left && pointerpos==1)
+		{
+			pointerpos=0;
+			unpress(7);
+			playsound(nMenuMoveSound, 100);
+		}
+		
+		if(b1 && pointerpos==0)
+		{
+			retval = 0;
+			done=0;
+			unpress(1);
+			playsound(nMenuClickSound, 100);
+		}
+
+		if(b1 && pointerpos==1)
+		{
+			retval = 1;
+			done=0;
+			unpress(1);
+			playsound(nMenuClickSound, 100);
+		}
+		
+		if(b2)
+		{
+			retval = 0;
+			done=0;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(win);
+	
+	return retval;
+}
+
+void UseSkill(int _char, int _skill)
+{
+	int done;
+	int useitemimg;
+	int pointerpos;
+	int i;
+	
+	useitemimg = GenerateWindow(600, 100);
+	
+	while(done==0)
+	{
+		Blit(100, 50, useitemimg, screen);
+		
+		for(i=0;i<3;i++)
+		{
+			if(nParty[i] >= 0)
+			{
+				PrintString(145 + (200*i), 65, screen, nFont, BatChars[nParty[i]].sName);
+				PrintString(145 + (200*i), 85, screen, nFont, "Hp: " + str(BatChars[nParty[i]].nHp) + "/" + str(BatChars[nParty[i]].nMaxHp));
+				PrintString(145 + (200*i), 105, screen, nFont, "Mp: " + str(BatChars[nParty[i]].nMp) + "/" + str(BatChars[nParty[i]].nMaxMp));
+			}
+		}
+		
+		//pointer
+		TBlit(120+(200*pointerpos), 70, nPointer, screen);
+		ShowPage();
+
+		if(left)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos--;
+					
+					if(pointerpos < 0)
+						pointerpos=2;
+				}
+				unpress(7);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(right)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos++;
+					
+					if(pointerpos > 2)
+						pointerpos=0;
+				}
+				unpress(8);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b1)
+		{
+			target = nParty[pointerpos];
+			attacker = _char;
+			nCommand = BatChars[_char].nSpells[_skill];
+			nSpell = _skill;
+			CallFunction(BatCommands[nCommand].sMenuFunc);
+			unpress(1);
+		}
+		
+		if(b2)
+		{
+			done=1;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(useitemimg);
+}
+
+//using an item, so show just the chars name, lvl, hp and mp
+void UseItem(int _item)
+{
+	int done;
+	int useitemimg;
+	int iteminfoimg;
+	int pointerpos;
+	int i;
+	
+	useitemimg = GenerateWindow(600, 100);
+	iteminfoimg = GenerateWindow(175, 80);
+	
+	while(done==0)
+	{
+		Blit(100, 50, useitemimg, screen);
+		Blit(20, 175, iteminfoimg, screen);
+		
+		PrintString(35, 185, screen, nFont, Items[_item].sName);
+		PrintString(35, 200, screen, nFont, "Left: " + str(nItemCount[nItemIndex[_item]]));
+		
+		for(i=0;i<3;i++)
+		{
+			if(nParty[i] >= 0)
+			{
+				PrintString(145 + (200*i), 65, screen, nFont, BatChars[nParty[i]].sName);
+				PrintString(145 + (200*i), 85, screen, nFont, "Hp: " + str(BatChars[nParty[i]].nHp) + "/" + str(BatChars[nParty[i]].nMaxHp));
+				PrintString(145 + (200*i), 105, screen, nFont, "Mp: " + str(BatChars[nParty[i]].nMp) + "/" + str(BatChars[nParty[i]].nMaxMp));
+			}
+		}
+		
+		//pointer
+		TBlit(120+(200*pointerpos), 70, nPointer, screen);
+		ShowPage();
+
+		if(left)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos--;
+					
+					if(pointerpos < 0)
+						pointerpos=2;
+				}
+				unpress(7);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(right)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos++;
+					
+					if(pointerpos > 2)
+						pointerpos=0;
+				}
+				unpress(8);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b1)
+		{
+			target = nParty[pointerpos];
+			CallFunction(Items[_item].sMenuFuncString);
+			
+			if(nItemCount[_item] <= 0)
+			{
+				done=1;
+			}
+			unpress(1);
+			playsound(nMenuClickSound, 100);
+		}
+		
+		if(b2)
+		{
+			done=1;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(iteminfoimg);
+	FreeImage(useitemimg);
+}
+
+//the menu of equping
+void EquipMenu()
+{
+	int char = ChoseMenuTarget();
+
+	int done;
+	int pointerpos;
+
+	int topleftimg;
+	int toprightimg;
+	int botleftimg;
+	int botrightimg;
+	
+	int mode; //what were selected on. =0 when choosing equip slot, =1 when chosing what item to equip
+	int slot; //what slot were choosing equipment for 0 = weapon, 1 = shield, 2 = helm, 3 = armor, 4 = ring
+	
+	int i,j,scroll,tempequip;
+	
+	topleftimg = GenerateWindow(250, 150);
+	toprightimg = GenerateWindow(405, 175);
+	botleftimg = GenerateWindow(325, 275);
+	botrightimg = GenerateWindow(325, 200);
+	
+	pointerpos = 0;
+	done=0;
+	mode=0;
+	
+	while(done==0)
+	{
+		//blit the windows
+		Blit(50, 50, topleftimg, screen);
+		Blit(400, 50, toprightimg, screen);
+		Blit(50, 300, botleftimg, screen);
+		Blit(400, 300, botrightimg, screen);
+		
+		//chars name
+		PrintString(85, 65, screen, nFont, BatChars[char].sName);
+		//hp
+		PrintString(85, 80, screen, nFont, "Hp:" + str(BatChars[char].nHp) + "/" + str(BatChars[char].nMaxHp));
+		//mp
+		PrintString(85, 95, screen, nFont, "Mp:" + str(BatChars[char].nMp) + "/" + str(BatChars[char].nMaxMp));
+		
+		//current equip
+		PrintString(435, 65, screen, nFont, "Weapon:");
+		PrintString(435, 80, screen, nFont, "Shield:");
+		PrintString(435, 95, screen, nFont, "Helm:");
+		PrintString(435, 110, screen, nFont, "Armor:");
+		PrintString(435, 125, screen, nFont, "Ring:");
+		
+		if(BatChars[char].nEquip[0] >= 0)
+			PrintString(535, 65, screen, nFont, Items[BatChars[char].nEquip[0]].sName);
+		if(BatChars[char].nEquip[1] >= 0)
+			PrintString(535, 80, screen, nFont, Items[BatChars[char].nEquip[1]].sName);
+		if(BatChars[char].nEquip[2] >= 0)
+			PrintString(535, 95, screen, nFont, Items[BatChars[char].nEquip[2]].sName);
+		if(BatChars[char].nEquip[3] >= 0)
+			PrintString(535, 110, screen, nFont, Items[BatChars[char].nEquip[3]].sName);
+		if(BatChars[char].nEquip[4] >= 0)
+			PrintString(535, 125, screen, nFont, Items[BatChars[char].nEquip[4]].sName);
+			
+		//remove all equip
+		PrintString(435, 155, screen, nFont, "Remove");
+			
+		//battle stats
+		InitChars(char, 0);
+		PrintString(415, 315, screen, nFont, "Attack Power:");
+		PrintString(415, 330, screen, nFont, "Hit:");
+		PrintString(415, 345, screen, nFont, "Defense:");
+		PrintString(415, 360, screen, nFont, "Evade:");
+		
+		PrintString(415, 390, screen, nFont, "Magic Power:");
+		PrintString(415, 405, screen, nFont, "Magic Hit:");
+		PrintString(415, 420, screen, nFont, "Magic Defense:");
+		PrintString(415, 435, screen, nFont, "Magic Evade:");
+		
+		PrintString(585, 315, screen, nFont, str(InBattleChars[0].nAttackPow));
+		PrintString(585, 330, screen, nFont, str(InBattleChars[0].nHit) + "%");
+		PrintString(585, 345, screen, nFont, str(InBattleChars[0].nDefense));
+		PrintString(585, 360, screen, nFont, str(InBattleChars[0].nEvade) + "%");
+		
+		PrintString(585, 390, screen, nFont, str(InBattleChars[0].nMagicPow));
+		PrintString(585, 405, screen, nFont, str(InBattleChars[0].nMagicHit) + "%");
+		PrintString(585, 420, screen, nFont, str(InBattleChars[0].nMagicDef));
+		PrintString(585, 435, screen, nFont, str(InBattleChars[0].nMagicEvade) + "%");
+		
+		//the effect of equiping this item
+		if(mode==1)
+		{
+			//record what the char is holding in this slot in a temp var
+			tempequip = BatChars[char].nEquip[slot];
+			//put the item in the slot
+			BatChars[char].nEquip[slot] = nItemIndex[equiparray[pointerpos+scroll]];
+			//call InitChars(char, 1); to get the new stats
+			InitChars(char, 1);
+			
+			//print all the modified values. If they go up, in green, down in red. same in white
+			if(InBattleChars[1].nAttackPow > InBattleChars[0].nAttackPow)
+				SuperPrintText(645, 315, 15, 19, screen, nFont, str(InBattleChars[1].nAttackPow), 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nAttackPow < InBattleChars[0].nAttackPow)
+				SuperPrintText(645, 315, 15, 19, screen, nFont, str(InBattleChars[1].nAttackPow), 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 315, screen, nFont, str(InBattleChars[1].nAttackPow));
+				
+			if(InBattleChars[1].nHit > InBattleChars[0].nHit)
+				SuperPrintText(645, 330, 15, 19, screen, nFont, str(InBattleChars[1].nHit) + "%", 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nHit < InBattleChars[0].nHit)
+				SuperPrintText(645, 330, 15, 19, screen, nFont, str(InBattleChars[1].nHit) + "%", 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 330, screen, nFont, str(InBattleChars[1].nHit) + "%");
+
+			if(InBattleChars[1].nDefense > InBattleChars[0].nDefense)
+				SuperPrintText(645, 345, 15, 19, screen, nFont, str(InBattleChars[1].nDefense), 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nDefense < InBattleChars[0].nDefense)
+				SuperPrintText(645, 345, 15, 19, screen, nFont, str(InBattleChars[1].nDefense), 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 345, screen, nFont, str(InBattleChars[1].nDefense));
+
+			if(InBattleChars[1].nEvade > InBattleChars[0].nEvade)
+				SuperPrintText(645, 360, 15, 19, screen, nFont, str(InBattleChars[1].nEvade) + "%", 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nEvade < InBattleChars[0].nEvade)
+				SuperPrintText(645, 360, 15, 19, screen, nFont, str(InBattleChars[1].nEvade) + "%", 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 360, screen, nFont, str(InBattleChars[1].nEvade) + "%");
+
+			///////////////
+
+			if(InBattleChars[1].nMagicPow > InBattleChars[0].nMagicPow)
+				SuperPrintText(645, 390, 15, 19, screen, nFont, str(InBattleChars[1].nMagicPow), 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nMagicPow < InBattleChars[0].nMagicPow)
+				SuperPrintText(645, 390, 15, 19, screen, nFont, str(InBattleChars[1].nMagicPow), 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 390, screen, nFont, str(InBattleChars[1].nMagicPow));
+		
+			if(InBattleChars[1].nMagicHit > InBattleChars[0].nMagicHit)
+				SuperPrintText(645, 405, 15, 19, screen, nFont, str(InBattleChars[1].nMagicHit) + "%", 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nMagicHit < InBattleChars[0].nMagicHit)
+				SuperPrintText(645, 405, 15, 19, screen, nFont, str(InBattleChars[1].nMagicHit) + "%", 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 405, screen, nFont, str(InBattleChars[1].nMagicHit) + "%");
+
+			if(InBattleChars[1].nMagicDef > InBattleChars[0].nMagicDef)
+				SuperPrintText(645, 420, 15, 19, screen, nFont, str(InBattleChars[1].nMagicDef), 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nMagicDef < InBattleChars[0].nMagicDef)
+				SuperPrintText(645, 420, 15, 19, screen, nFont, str(InBattleChars[1].nMagicDef), 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 420, screen, nFont, str(InBattleChars[1].nMagicDef));
+
+			if(InBattleChars[1].nMagicEvade > InBattleChars[0].nMagicEvade)
+				SuperPrintText(645, 435, 15, 19, screen, nFont, str(InBattleChars[1].nMagicEvade) + "%", 100, RGB(0, 255, 0));
+			else if(InBattleChars[1].nMagicEvade < InBattleChars[0].nMagicEvade)
+				SuperPrintText(645, 435, 15, 19, screen, nFont, str(InBattleChars[1].nMagicEvade) + "%", 100, RGB(255, 0, 0));
+			else
+				PrintString(645, 435, screen, nFont, str(InBattleChars[1].nMagicEvade) + "%");
+			
+			//put the original equip back on
+			BatChars[char].nEquip[slot] = tempequip;
+		}
+		
+		//the list of equipable items
+		if(mode==1)
+		{
+			for(i=scroll;i<scroll+20;i++)
+			{
+				if(equiparray[i]<0)
+				{
+					i=scroll+20; //take that loop logic!
+				}
+
+				PrintString(85, 305 + (15*(i-scroll)), screen, nFont, Items[nItemIndex[equiparray[i]]].sName);
+			}
+		}
+		
+		if(mode==0)
+		{
+			if(pointerpos == 5)
+				TBlit(410, 80+(15*pointerpos), nPointer, screen);
+			else
+				TBlit(410, 65+(15*pointerpos), nPointer, screen);
+		}
+		else
+			TBlit(55, 305+(15*pointerpos), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			unpress(5);
+			if(mode == 0)
+			{
+				if(pointerpos > 0)
+				{
+					pointerpos--;
+				}
+			}
+			else
+			{
+				if(pointerpos > 0)
+				{
+					pointerpos--;
+				}
+				else
+				{
+					if(scroll > 0)
+					{
+						scroll--;
+					}
+				}	
+			}
+		}
+		
+		if(down)
+		{
+			unpress(6);
+			if(mode == 0)
+			{
+				if(pointerpos < 5)
+				{
+					pointerpos++;
+				}
+			}
+			else
+			{
+				if(pointerpos < EQUIP_LIST_LEN && pointerpos+scroll < equiplen-1)
+				{
+					pointerpos++;
+				}
+				else
+				{
+					if(scroll < equiplen-EQUIP_LIST_LEN)
+					{
+						scroll++;
+					}
+				}	
+			}
+		}
+		
+		if(b1)
+		{
+			unpress(1);
+			
+			if(mode == 0)
+			{
+				if(pointerpos < 5)
+				{
+					slot = pointerpos;
+					
+					for(i=0;i<MAX_ITEMS;i++)
+					{
+						equiparray[i] = 0-1;
+					}
+					equiplen = 0;
+
+					j=0;
+					//go through the list of item indexes. If theres more then 0 of them
+					//and it will fit in the slot, show it
+					for(i=0;i<MAX_ITEMS;i++)
+					{
+						if(nItemIndex[i] >= 0 && nItemCount[i] > 0 && Items[nItemIndex[i]].nSlot == slot)
+						{
+							equiparray[j] = i;
+							j++;
+						}
+					}
+					equiplen = j;
+
+					if(equiplen > 0)
+					{
+						scroll=0;
+						mode = 1;
+						pointerpos = 0;
+					}
+					else
+					{
+						PlaySound(nErrorSound, 100);
+					}
+				}
+				else
+				{
+					//remove equipment
+					for(i=0;i<5;i++)
+					{
+						GetItemNoText(BatChars[char].nEquip[i], 1);
+						BatChars[char].nEquip[i] = 0-1;
+					}
+				}
+
+			}
+			else
+			{
+				//gain the item they dequiped
+				GetItemNoText(BatChars[char].nEquip[slot], 1);
+				//set the equiped item in the players struct
+				BatChars[char].nEquip[slot] = nItemIndex[equiparray[pointerpos+scroll]];
+				//lose the item they equiped
+				RemoveItem(nItemIndex[equiparray[pointerpos+scroll]], 1);
+
+				mode = 0;
+				pointerpos = slot;
+			}
+		}
+		
+		if(b2)
+		{
+			unpress(2);
+
+			if(mode == 0)
+			{
+				done=1;
+			}
+			else
+			{
+				pointerpos=slot;
+				mode=0;
+			}
+		}
+	}
+	
+	FreeImage(topleftimg);
+	FreeImage(toprightimg);
+	FreeImage(botleftimg);
+	FreeImage(botrightimg);
+}
+
+//the menu of items
+void ItemMenu()
+{
+	int done;
+
+	int itemmenuimg;
+	int i;
+	int pointerpos;
+	int scroll;
+	
+
+	itemmenuimg = GenerateWindow(500, 300);
+	
+	pointerpos=0;
+	
+	done=0;
+	scroll=0;
+	
+	while(done==0)
+	{
+		Blit(150, 100, itemmenuimg, screen);
+		
+		for(i=scroll;i<scroll+ITEM_MENU_SIZE;i++)
+		{
+			if(nItemIndex[i] >= 0 && nItemCount[i] > 0)
+			{
+				//item name and count
+				PrintString(195, 120+(20*(i-scroll)), screen, nFont, Items[nItemIndex[i]].sName);
+				PrintString(465, 120+(20*(i-scroll)), screen, nFont, str(nItemCount[i]));
+			}
+		}
+		
+		//pointer
+		TBlit(165, 120+(20*pointerpos), nPointer, screen);
+		
+		ShowPage();
+		
+		if(b1)
+		{
+			unpress(1);
+			if(nItemIndex[pointerpos+scroll] >= 0 && nItemCount[pointerpos+scroll] > 0)
+			{
+				playsound(nMenuClickSound, 100);
+				UseItem(nItemIndex[pointerpos+scroll]);
+				Render();
+				DrawMainMenu();
+			}
+		}
+		
+		if(b2)
+		{
+			done=1;
+			unpress(2);
+		}
+		
+		if(up)
+		{
+			if(pointerpos>0)
+			{
+				pointerpos--;
+				playsound(nMenuMoveSound, 100);
+			}
+			else
+			{
+				scroll--;
+				if(scroll<0)
+				{
+					scroll=0;
+				}
+			}
+			unpress(5);
+		}
+
+		if(down)
+		{
+			if(pointerpos<ITEM_MENU_SIZE)
+			{
+				pointerpos++;
+				playsound(nMenuMoveSound, 100);
+			}
+			else
+			{
+				scroll++;
+				if(scroll > MAX_ITEMS-ITEM_MENU_SIZE)
+				{
+					scroll = MAX_ITEMS-ITEM_MENU_SIZE;
+				}
+			}
+			unpress(6);
+		}
+	}
+	
+	FreeImage(itemmenuimg);
+}
+
+int ChoseMenuTarget()
+{
+	int pointerpos;
+	int retval;
+	int done;
+	
+	done=0;
+	pointerpos=0;
+	
+	while(done==0)
+	{
+		DrawMainMenu();
+		TBlit((133*pointerpos)+203, 230, nPointer, screen);
+		ShowPage();
+
+		if(left)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos--;
+					
+					if(pointerpos < 0)
+						pointerpos=2;
+				}
+				unpress(7);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(right)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				while(nParty[pointerpos] < 0)
+				{
+					pointerpos++;
+					
+					if(pointerpos > 2)
+						pointerpos=0;
+				}
+				unpress(8);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b2)
+		{
+			retval=0;
+			retval--;
+			done=1;
+			unpress(2);
+		}
+		
+		if(b1)
+		{
+			retval=nParty[pointerpos];
+			done=1;
+			unpress(1);
+			playsound(nMenuClickSound, 100);
+		}
+	}
+	
+	return retval;
+}
+
+void StatusMenu()
+{
+	int char = ChoseMenuTarget();
+	int win;
+	int done;
+	int i;
+	
+
+	if(char >= 0)
+	{
+		done=1;
+		win = GenerateWindow(500, 300);
+		
+		//calculate there in battle stats
+		InitChars(char, 0);
+	
+		while(done)
+		{
+			//blit the window
+			Blit(100, 50, win, screen);
+		
+			//LEFT SIDE
+		
+			//name
+			PrintString(116, 65, screen, nFont, BatChars[char].sName);
+			//lvl
+			PrintString(116, 80, screen, nFont, "Lvl: " + str(BatChars[char].nLvl));
+			//hp
+			PrintString(116, 95, screen, nFont, "Hp: " + str(BatChars[char].nHp) + "/" + str(BatChars[char].nMaxHp));
+			//mp
+			PrintString(116, 110, screen, nFont, "Mp: " + str(BatChars[char].nMp) + "/" + str(BatChars[char].nMaxMp));
+
+			//str
+			PrintString(116, 140, screen, nFont, "Str: " + str(BatChars[char].nStr));
+			//dex
+			PrintString(116, 155, screen, nFont, "Dex: " + str(BatChars[char].nDex));
+			//con
+			PrintString(116, 170, screen, nFont, "Con: " + str(BatChars[char].nCon));
+			//wis
+			PrintString(116, 185, screen, nFont, "Wis: " + str(BatChars[char].nWis));
+			//int
+			PrintString(116, 200, screen, nFont, "Int: " + str(BatChars[char].nInt));
+			//speed
+			PrintString(116, 215, screen, nFont, "Spd: " + str(BatChars[char].nSpeed));
+		
+			//attpow
+			PrintString(116, 260, screen, nFont, "AttPow: " + str(InBattleChars[0].nAttackPow));
+			//def
+			PrintString(116, 275, screen, nFont, "Def: " + str(InBattleChars[0].nDefense));
+			//evade
+			PrintString(116, 290, screen, nFont, "Evade: " + str(InBattleChars[0].nEvade) + "%");
+			//hit
+			PrintString(116, 305, screen, nFont, "Hit: " + str(InBattleChars[0].nHit) + "%");
+
+			//RIGHT SIDE
+
+			//exp
+			PrintString(316, 200, screen, nFont, "Exp: " + str(BatChars[char].nExp));
+			//tnl
+			PrintString(316, 215, screen, nFont, "TNL: " + str(BatChars[char].nTNL-BatChars[char].nExp));
+			
+			//magicpow
+			PrintString(316, 260, screen, nFont, "MagPow: " + str(InBattleChars[0].nMagicPow));
+			//magicdef
+			PrintString(316, 275, screen, nFont, "MagDef: " + str(InBattleChars[0].nMagicDef));
+			//magichit
+			PrintString(316, 290, screen, nFont, "MagHit: " + str(InBattleChars[0].nMagicHit) + "%");
+			//magicevade
+			PrintString(316, 305, screen, nFont, "MagEvade: " + str(InBattleChars[0].nMagicEvade) + "%");
+			
+			//FAR RIGHT SIDE
+			
+			//commands
+			PrintString(496, 155, screen, nFont, "Commands:");
+			for(i=0;i<3;i++)
+			{
+				PrintString(511, 170+ (i*15), screen, nFont, BatCommands[BatChars[char].nCommands[i]].sName);
+			}
+			
+		
+			ShowPage();
+		
+			if(b2)
+			{
+				done=0;
+				unpress(2);
+			}
+		}
+	
+		FreeImage(win);
+	}
+}
+
+void DumpExpMenu(int skill, int char)
+{
+	int win = GenerateWindow(400, 150);
+	int pointerpos;
+	int done;
+	int exptoadd;
+	
+	done=1;
+	pointerpos=0;
+	exptoadd=100;
+	
+	while(done)
+	{
+		Blit(175, 175, win, screen);
+		
+		PrintString(190, 190, screen, nFont, BatCommands[BatChars[char].nSpells[skill]].sName);
+		PrintString(350, 190, screen, nFont, str(BatChars[char].nSpellExp[skill]) + "/" + str(pow(BatChars[char].nSpellLevel[skill]+1, SKILL_LEVEL_FUNC)) + " exp");
+		PrintString(500, 190, screen, nFont, str(BatChars[char].nSpellLevel[skill]) + "%");
+		
+		PrintString(190, 220, screen, nFont, str(BatChars[char].nExp) + " total character exp left");
+		PrintString(190, 235, screen, nFont, str((BatChars[char].nTNL/2) - BatChars[char].nExpDumped) + " exp left for this character level");
+		
+		PrintString(220, 265, screen, nFont, "Add " + str(exptoadd) + " exp");
+		PrintString(220, 280, screen, nFont, "Cancel");
+		
+		TBlit(190, 265+ (pointerpos*15), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+			
+		if(down)
+		{
+			if(pointerpos < 1)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(b1)
+		{
+			//say good by to your hard earned exp
+			if(pointerpos == 0)
+			{
+				if(BatChars[char].nExp >= exptoadd)
+				{
+					if(BatChars[char].nTNL/2 - BatChars[char].nExpDumped >= exptoadd)
+					{
+						BatChars[char].nExp -= exptoadd;
+						BatChars[char].nSpellExp[skill] += exptoadd;
+						BatChars[char].nExpDumped += exptoadd;
+				
+						while(BatChars[char].nSpellExp[skill] >= pow(BatChars[char].nSpellLevel[skill]+1, SKILL_LEVEL_FUNC))
+						{
+							PlaySound(nLevelUpSound, 100);
+							BatChars[char].nSpellExp[skill]-=pow(BatChars[char].nSpellLevel[skill]+1, SKILL_LEVEL_FUNC);
+							BatChars[char].nSpellLevel[skill]++;
+						}
+					}
+				}
+				else
+				{
+					PlaySound(nErrorSound, 100);
+				}
+
+			}
+			
+			if(pointerpos == 1)
+			{
+				done=0;
+			}
+			
+			unpress(1);
+		}
+
+		if(b2)
+		{
+			done=0;
+			unpress(2);
+		}
+	}
+}
+
+void SecondSkillMenu(int skill, int char)
+{
+	//pop up a little menu that lets you chose between using a skill
+	//and dumping exp into it
+	int win = GenerateWindow(200, 60);
+	int pointerpos;
+	int done;
+	
+	done=1;
+	pointerpos=0;
+	
+	while(done)
+	{
+		Blit(85, 120, win, screen);
+		
+		PrintString(115, 135, screen, nFont, "Use skill");
+		PrintString(115, 150, screen, nFont, "Add exp to skill");
+		
+		TBlit(95, 135 + (pointerpos*15), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+			
+		if(down)
+		{
+			if(pointerpos < 1)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+
+		if(b1)
+		{
+			unpress(1);
+
+			if(!BatChars[char].nDead)
+			{
+				if(pointerpos == 0)
+				{
+					//go into use skill menu
+					if(BatCommands[BatChars[char].nSpells[skill]].nMenu)
+					{
+						playsound(nMenuClickSound, 100);
+						UseSkill(char, skill);
+						Render();
+						DrawMainMenu();
+						done=0;
+					}
+					else
+					{
+						PlaySound(nErrorSound, 100);
+					}
+				}
+				else if(pointerpos == 1)
+				{
+					playsound(nMenuClickSound, 100);
+					DumpExpMenu(skill, char);
+					done=0;
+					//go into exp dump menu
+				}
+			}
+			else
+			{
+				PlaySound(nErrorSound, 100);
+			}
+		}
+		
+		if(b2)
+		{
+			done=0;
+			unpress(2);
+		}
+	}
+	
+	FreeImage(win);
+}
+
+void ButtonMenu()
+{
+	//window to change what buttons do what
+
+	int win;
+	int done, done2;
+	int fhand;
+	int pointerpos;
+	int i;
+	int newkey;
+	int bkg;
+	int count;
+	
+	int btnOk, btnCancel, btnMenu;
+	
+	//first open buttons.sav
+	fhand = FileOpen("buttons.sav", FILE_READ);
+	
+	if(!fhand)
+	{
+		//buttons.sav dosen't exist - make it
+		fhand = FileOpen("buttons.sav", FILE_WRITE);
+		
+		FileWriteByte(fhand, SCAN_ENTER);
+		FileWriteByte(fhand, SCAN_ALT);
+		FileWriteByte(fhand, SCAN_ESC);
+		
+		FileClose(fhand);
+		
+		//now reopen it
+		fhand = FileOpen("buttons.sav", FILE_READ);
+	}
+	
+	//read the buttons
+
+	btnOk = FileReadByte(fhand);
+	btnCancel = FileReadByte(fhand);
+	btnMenu = FileReadByte(fhand);
+	
+	//close the file
+	FileClose(fhand);
+	
+	//generate the window
+	win = GenerateWindow(230, 85);
+	
+	done=0;
+	
+	while(!done)
+	{
+		//blit the window
+		Blit(200, 150, win, screen);
+		
+		//ok
+		PrintString(240, 165, screen, nFont, "Ok");
+		PrintString(340, 165, screen, nFont, KeyName(btnOk));
+		//cancel
+		PrintString(240, 180, screen, nFont, "Cancel");
+		PrintString(340, 180, screen, nFont, KeyName(btnCancel));
+		//menu
+		PrintString(240, 195, screen, nFont, "Menu");
+		PrintString(340, 195, screen, nFont, KeyName(btnMenu));
+		
+		//pointer
+		TBlit(205, 165 + (pointerpos*15), nPointer, screen);
+		
+		ShowPage();
+		
+		done2=0;
+		
+		if(b1)
+		{
+			count=1;
+			timer=0;
+			
+			bkg = DuplicateImage(screen);
+			
+			unpress(1);
+			key[btnOk] = 0;
+			//wait for input
+			while(!done2)
+			{
+				for(i=1;i<=88;i++)
+				{
+					if(key[i])
+					{
+						//first check to see if this key is already used
+						if(i == btnOk || i == btnCancel || i == btnMenu)
+						{
+							PlaySound(nErrorSound, 100);
+						}
+						else
+						{
+							//user pressed a key
+							newkey = i;
+							//break the loops
+							i=89;
+							done2 = 1;
+						}
+					}
+				}
+							
+				Blit(0, 0, bkg, screen);
+				
+				if(count < 0)
+					SetLucent(0-1 * count);
+				else
+				 	SetLucent(count);
+				 	
+				PrintString(230, 210, screen, nFont, "Press a key");
+				SetLucent(0);
+				
+				if(count >= 0)
+				{
+					count+=2;
+
+					if(count > 100)
+					{
+						//if count is bigger then a hundred
+						//make it negative to show that it's now cointing down
+						count = 0-100;
+					}
+				}
+				else
+				{
+					count+=2;
+						
+					if(count >= 0)
+					{
+						//if count is greater then 0
+						//make it positive to show it's counting up again
+						count = 1;
+					}
+				}
+				
+				ShowPage();
+				UpdateControls();
+			}
+			
+			if(pointerpos == 0)
+				btnOk = newkey;
+			else if(pointerpos == 1)
+				btnCancel = newkey;
+			else if(pointerpos == 2)
+				btnMenu = newkey;
+				
+			FreeImage(bkg);
+		}
+		else if(b2)
+		{
+			//set the new keys
+			SetButtonKey(1, btnOk);
+			SetButtonKey(2, btnCancel);
+			SetButtonKey(3, btnMenu);
+			
+			//save the keys to the file
+			fhand = FileOpen("buttons.sav", FILE_WRITE);
+
+			FileWriteByte(fhand, btnOk);
+			FileWriteByte(fhand, btnCancel);
+			FileWriteByte(fhand, btnMenu);
+
+			FileClose(fhand);
+
+			done=1;
+		}
+		else if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				PlaySound(nMenuMoveSound, 100);
+				unpress(5);
+			}
+		}
+		else if(down)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				PlaySound(nMenuMoveSound, 100);
+				unpress(6);
+			}
+		}
+	}
+	
+	FreeImage(win);
+}
+
+void ConfigMenu()
+{
+	int win;
+	int pointerpos;
+	int done;
+	
+	pointerpos=0;
+	done=0;
+	win=GenerateWindow(300, 200);
+	
+	while(!done)
+	{
+		Blit(130, 130, win, screen);
+		
+		PrintString(160, 145, screen, nFont, "Battle Speed:");
+		PrintString(330, 145, screen, nFont, str(nBattleSpeed));
+		PrintString(160, 175, screen, nFont, "Text Speed:");
+		PrintString(330, 175, screen, nFont, str(nTextSpeed));
+		PrintString(160, 205, screen, nFont, "Battle Scroll:");
+		if(nManualWait == 0)
+			PrintString(330, 205, screen, nFont, "Auto");
+		else if(nManualWait == 1)
+			PrintString(330, 205, screen, nFont, "Mixed");
+		else if(nManualWait == 2)
+			PrintString(330, 205, screen, nFont, "Manual");
+			
+		TBlit(135, 145 + (pointerpos*30), nPointer, screen);
+
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+			
+		if(down)
+		{
+			if(pointerpos < 2)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(left)
+		{
+			unpress(7);
+			
+			if(pointerpos == 0)
+			{
+				if(nBattleSpeed > 1)
+					nBattleSpeed--;
+			}
+			else if(pointerpos == 1)
+			{
+				if(nTextSpeed > 1)
+					nTextSpeed--;
+			}
+			else if(pointerpos == 2)
+			{
+				if(nManualWait > 0)
+					nManualWait--;
+			}
+		}
+		
+		if(right)
+		{
+			unpress(8);
+			
+			if(pointerpos == 0)
+			{
+				if(nBattleSpeed < 10)
+					nBattleSpeed++;
+			}
+			else if(pointerpos == 1)
+			{
+				if(nTextSpeed < 10)
+					nTextSpeed++;
+			}
+			else if(pointerpos == 2)
+			{
+				if(nManualWait < 2)
+					nManualWait++;
+			}
+		}
+
+		if(b2)
+		{
+			done=1;
+			unpress(2);
+		}
+	}
+}
+void SkillMenu()
+{
+	int char = ChoseMenuTarget();
+	int win;
+	int done;
+	int i;
+	int pointerpos;
+	int numskills;
+	
+	pointerpos=0;
+	if(char >= 0)
+	{
+		done=1;
+		win = GenerateWindow(500, 300);
+		
+		while(done)
+		{
+			
+			Blit(75, 75, win, screen);
+			
+			numskills=0;
+			//list out all there skills/spells, it's exp/exp to lvl and, profecency
+			for(i=0;i<10;i++)
+			{
+				if(BatChars[char].nSpells[i] > 0)
+				{
+					PrintString(110, 90 + (i*30), screen, nFont, BatCommands[BatChars[char].nSpells[i]].sName);
+					PrintString(310, 90 + (i*30), screen, nFont, str(BatChars[char].nSpellLevel[i]) + "%");
+					PrintString(410, 90 + (i*30), screen, nFont, str(BatChars[char].nSpellExp[i]) + "/" + str(pow(BatChars[char].nSpellLevel[i]+1,SKILL_LEVEL_FUNC)));
+					numskills++;
+				}
+			}
+			
+			//pointer
+			TBlit(90, 90 + (pointerpos*30), nPointer, screen);
+			
+			ShowPage();
+			
+			if(up)
+			{
+				if(pointerpos > 0)
+				{
+					pointerpos--;
+					unpress(5);
+					playsound(nMenuMoveSound, 100);
+				}
+			}
+			
+			if(down)
+			{
+				if(pointerpos < numskills-1)
+				{
+					pointerpos++;
+					unpress(6);
+					playsound(nMenuMoveSound, 100);
+				}
+			}
+			
+			if(b1)
+			{
+				unpress(1);
+				playsound(nMenuClickSound, 100);
+				SecondSkillMenu(pointerpos, char);
+			}
+			
+			if(b2)
+			{
+				done=0;
+				unpress(2);
+			}
+		}
+	
+		FreeImage(win);
+	}
+}
+
+void InitMainMenu()
+{
+	nMenuTopWindow = GenerateWindow(400, 300);
+	nMenuBotWindow = GenerateWindow(150, 225);
+	nMenuGoldWindow = GenerateWindow(150, 75);
+}
+
+void KillMainMenu()
+{
+	FreeImage(nMenuTopWindow);
+	FreeImage(nMenuBotWindow);
+	FreeImage(nMenuGoldWindow);
+}
+
+//a func to draw the main menu. 
+//tore out of MainMenu() basically so i can use it
+//in ChoseMenuTarget()
+void DrawMainMenu()
+{
+	int i;
+
+	//the menus
+	Blit(200, 100, nMenuTopWindow, screen);
+	Blit(625, 250, nMenuBotWindow, screen);
+	Blit(625, 150, nMenuGoldWindow, screen);
+		
+	//the text on bottom
+	PrintString(660, 265, screen, nFont, "Item");
+	PrintString(660, 295, screen, nFont, "Equip");
+	PrintString(660, 325, screen, nFont, "Status");
+	PrintString(660, 355, screen, nFont, "Skills");
+	PrintString(660, 385, screen, nFont, "Config");
+
+	PrintString(660, 415, screen, nFont, "Save");
+	PrintString(660, 445, screen, nFont, "Exit");
+
+	for(i=0;i<3;i++)
+	{
+		if(nParty[i] >= 0)
+		{
+			//character names
+			PrintString(223 + (i*133), 115, screen, nFont, BatChars[nParty[i]].sName);
+			//char levels
+			PrintString(223 + (i*133), 330, screen, nFont, "Level: " + str(BatChars[nParty[i]].nLvl));
+			//char hp
+			PrintString(223 + (i*133), 350, screen, nFont, "Hp: " + str(BatChars[nParty[i]].nHp) + "/" + str(BatChars[nParty[i]].nMaxHp));
+			//char mp
+			PrintString(223 + (i*133), 370, screen, nFont, "Mp: " + str(BatChars[nParty[i]].nMp) + "/" + str(BatChars[nParty[i]].nMaxMp));
+		}
+	}
+	
+
+	
+	//bling
+	PrintString(640, 165, screen, nFont, "Bling: " + str(nBling));
+}
+
+//shows the main menu
+//lets the user .... do things....
+void MainMenu()
+{
+	int pointerpos;
+
+	int done;
+	done = 0;
+	pointerpos=0;
+	
+	if(!nMenuCanOpen)
+		return;
+	
+	SetEntitiesPaused(1);
+		
+	nMenuCanOpen = 0;//don't open the menu if were already in it
+	
+	InitMainMenu();
+	
+	while(done == 0)
+	{
+		DrawMainMenu();
+		
+		//pointer
+		TBlit(630,(30*pointerpos)+265, nPointer, screen);
+		ShowPage(); //stupid showpage.....
+		
+		//do stuff
+		if(b1)
+		{
+			if(pointerpos == 0)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				ItemMenu();
+				Render(); //get rid of the ghost image
+			}
+			else if(pointerpos == 1)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				EquipMenu();
+				Render();
+			}
+			else if(pointerpos == 2)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				StatusMenu();
+				Render();
+			}
+			else if(pointerpos == 3)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				SkillMenu();
+				Render();
+			}
+			else if(pointerpos == 4)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				ConfigMenu();
+				Render();
+			}
+			else if(pointerpos == 5)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				SaveMenu();
+				Render();
+			}
+			else if(pointerpos == 6)
+			{
+				playsound(nMenuClickSound, 100);
+				Unpress(1);
+				if(ChoiceMenu("Exit?", 550, 375))
+					ShutdownGame();
+				
+				Render();
+			}
+		}
+		
+		//cancel out of the menu
+		if(b2)
+			done = 1;
+		
+		if(down)
+		{
+			if(pointerpos < 6)
+			{
+				pointerpos++;
+				unpress(6);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				unpress(5);
+				playsound(nMenuMoveSound, 100);
+			}
+		}
+	}
+	
+	KillMainMenu();
+	
+	nMenuCanOpen = 1; //closed the menu so you can open it again
+	SetEntitiesPaused(0);
+}
+
+int GenerateWindow(int width, int height)
+{
+	int win = NewImage(width, height);
+	int step;
+	int cur, cur2;
+	int _x,_y;
+	
+	if(height > 100)
+	{
+		step = height/100;
+		step++; //a tweak so boxes over 100 look the same as boxes under 100
+	}
+	else
+	{
+		step = 100/height;
+	}
+	
+	//wrap bkg image
+	WrapBlit(0, 0, nWindowBkg, win);
+	
+	//darken the image as it goes down
+	if(height > 100)
+	{
+		cur=100;
+		cur2=0;
+		for(_y=0;_y<height;_y++)
+		{
+			SetLucent(cur);
+			Line(0, _y, width, _y, RGB(0, 0, 0), win);
+			SetLucent(0);
+			cur2++;
+			
+			if(cur2 > step)
+			{
+				cur-=2;
+				cur2=0; //BLAAAARGH!
+			}
+		}
+	}
+	else
+	{
+		cur=100;
+		for(_y=0;_y<height;_y++)
+		{
+			SetLucent(cur);
+			Line(0, _y, width, _y, RGB(0, 0, 0), win);
+			SetLucent(0);
+			cur-=step;
+		}
+	}
+	
+	//draw border around it
+	Rect(0, 0, width, height, RGB(255,255,255), win);
+	
+	return win;
+}
+
+//loads resources for the menus/windows
+void InitMenu()
+{
+	if(nWindowBkgIndex == 0)
+	{
+		nWindowBkg = LoadImage("windowbkg.png");
+	}
+	else if(nWindowBkgIndex == 1)
+	{
+		nWindowBkg = LoadImage("techbkg.png");
+	}
+}
+
+void ShutDownMenu()
+{
+	FreeImage(nWindowBkg);
+}
+
+void TextBox(string text)
+{
+	int waitamt;
+	int i;
+	int lines,totallines;
+	int curpos;
+	int textx, texty;
+
+	Render();
+	nMenuCanOpen = 0;
+	
+	timer=0;
+	i=0;
+	waitamt=30;
+	textx = 65;
+	texty = 465;
+
+	Blit(50, 450, nTextBoxBkg, screen);
+		
+	lines=WrapText(nFont, text)-1;
+			
+	//"typing text" effect - because I'm a FF whore
+	//actually, If the kirby games had a text effect, I would use that
+	//cause right now I'm a kirby whore
+		
+	totallines = lines;
+	while (lines >= 0)
+	{
+		for (curpos = 1; curpos <= len(textwrap[totallines-lines]); curpos++)
+		{
+			PrintString(textx, texty, screen, nFont, left(textwrap[totallines-lines], curpos));
+			ShowPage();
+			wait(nTextSpeed);
+			
+			if(b1)
+			{
+				//user is impatient and hit the button. do directly to the waiting
+				lines=0-1; //break out of the loop
+				curpos=len(textwrap[totallines-lines])+1;
+				unpress(0);
+			}
+		}
+		lines--;
+		texty = texty+(30); //30 pixels between lines
+	}
+		
+	while(!b1)
+	{
+		Blit(50, 450, nTextBoxBkg, screen);
+	
+		PrintString(65, 465, screen, nFont, textwrap[0]);
+		PrintString(65, 495, screen, nFont, textwrap[1]);
+		PrintString(65, 525, screen, nFont, textwrap[2]);
+		PrintString(65, 555, screen, nFont, textwrap[3]);
+
+		if(waitamt==30)
+			ShowPage();
+		
+		nWait=0;
+			
+		if(timer > waitamt)
+		{
+			waitamt=5;
+			TBlitFrame(710, 560, nDownPointerAnim, i, screen);
+			ShowPage();
+			timer=0;
+			i++;
+				
+			if(i > 9)
+				i=0;
+		}
+	}
+	
+	Unpress(0);
+	
+	nMenuCanOpen = 1;
+	Render();
+}
+
+int TextBoxQuestion(string str1, string str2, string str3, string str4, string quest)
+{
+	int retval;
+
+	
+	Render();
+	nMenuCanOpen = 0;
+	
+	Blit(50, 450, nTextBoxBkg, screen);
+		
+	PrintString(65, 465, screen, nFont, str1);
+	PrintString(65, 495, screen, nFont, str2);
+	PrintString(65, 525, screen, nFont, str3);
+	PrintString(65, 555, screen, nFont, str4);
+	
+	retval = ChoiceMenu(quest, 625, 375);
+	
+	nMenuCanOpen = 1;
+	
+	Render();
+	
+	return retval;
+}

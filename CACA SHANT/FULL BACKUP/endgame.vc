@@ -1,0 +1,60 @@
+void EndGame()
+{
+	int keadik;
+	TextBox("Acolyte: Noooo!!! It can't be!");
+	//acolyte runs out of the room
+	EntityMove(0, "U15");
+	while(entity.movecode[0])
+	{
+		Render();
+		ShowPage();
+	}
+	entity.x[0] = 0;
+	entity.y[0] = 0;
+	Render();
+	ShowPage();
+	wait(100);
+	//wait a sec
+	TextBox("Acolyte: Eaaarrrggghhhhh!!");
+	//spawn Keadik
+	keadik = EntitySpawn(125, 88, "thush.chr");
+	//Keadik walks in
+	EntityMove(keadik, "D3");
+	while(entity.movecode[keadik])
+	{
+		Render();
+		ShowPage();
+	}
+	
+	entity.face[nPlayerEnt] = 1;
+	entity.face[2] = 1;
+	entity.face[3] = 1;
+	
+	TextBox("Keadik: I have been looking for that villian for weeks now, I finally had the chance to run him through.");
+	TextBox("Keadik: Now what is the meaning of all this? Didn't I throw you all in the dungeon? Where are all the guards?");
+	TextBox(BatChars[0].sName + ": Keadik... impeccable timing as usual.");
+	TextBox("Keadik: Wait... what did you just say...? " + BatChars[0].sName + "?");
+	TextBox(BatChars[0].sName + ": Yes my old friend, it really is me.");
+	TextBox("Keadik: With all the high tensions around the castle I must not of recognized you. " + BatChars[0].sName + ", you certaintly look different from when I remember you.");
+	TextBox(BatChars[0].sName + ": Yes well much has changed since then.");
+	TextBox(BatChars[2].sName + ": I guess he was never under under the control of the Acolyte.");
+	TextBox(BatChars[0].sName + ": But first things first. I want to know where my the cows are.");
+	FadeOut(50);
+	
+	//set the end game flag, the start functions of the maps will do the rest
+
+	nFlags[99] = 1;
+	
+	FadeOut(50);
+
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong("end.it");
+	PlaySong(nMapSong);
+	nMenuCanOpen = 0;
+	map("castle.map");
+}

@@ -1,0 +1,59 @@
+*before getting alea*
+Guard: No entry without a pass.
+
+*after getting alea*
+Guard: No entry without a pass.
+
+Thoush: I don't have time for this.
+
+Alea: Hold on Thoush don't get too excited, let me handle it. I'm sure we're both sensible people and I can talk him into letting us through.
+
+Let Alea handle it?
+	-Yes
+		Alea: (to guard) Sir? If you would be so kind as to let us pass. We have urgent business with the Kingdom of Drolith. 
+		
+		Guard: Not my problem. No pass no entry.
+		
+		Alea: But all of our cows, they were taken somehow and the only way we can find out what happened is if you let us through.
+		
+		Guard: Like I said before. You're not getting through.
+		
+		Thoush: I don't think he's going to let us through.
+
+		Guard: He seems do get it, apparently you don't.
+		Alea (angry): Grrrrrrr (chants)
+
+		Alea: Dark forces I summon thee
+			Take those away that would do me harm
+			And leave nothing but thin air in your wake
+
+		*Inversion effect, purple lighting effect from boards thingy, when the mist clears, the guard is gone*
+		http://www.verge-rpg.com/boards/display_thread.php?id=9797&offs=0&curPage=0&PHPSESSID=fc7cc3b61860c77106374adcebc64504#post16221
+
+
+		Thoush: When did you learn to do that?!
+
+		Alea: Oh you know I've always had some latent magical abilities.
+
+		Thoush: Yeah but....
+
+		Alea: Well.... we can pass now.
+
+		Alea learned 'Banishment'!
+
+	-No
+		Thoush: I'll handle it my way.
+
+		Thoush (to guard): Oh mister guard? You're not going to let us through?
+
+		Guard: No.
+
+		Thoush: Well I have 5 reasons right here that might just change your mind.
+
+		*POW*
+
+		*Guard is knocked out*
+
+		Alea: Was all that necessary?
+
+		Thoush: Yes.

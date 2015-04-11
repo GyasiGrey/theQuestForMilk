@@ -1,0 +1,33 @@
+0 - Cattle pen has been entered
+1 to 5 - Chest boxes in farm house
+6 - Thoush talks to guard in jail once
+7 - Thoush talks to guard in jail twice
+8 - Thoush talks to Alea in jail
+9 - Thoush talks to Rhac/Touldr in jail
+10 - Took Rhac
+11 - Took Touldr
+12 - Have Alea
+13 - Talked to Thyr
+14 - Dukon guard eliminated
+15 - Had Drolith flashback
+16 - Castle flashback over, let alea say some stuff
+17 - Went to police station
+18 - Went to magic guild
+19 - Went to restaurant
+20 - Talked to cops
+21 - Just "Infiltrated" the castle, so the the end of the dialog
+22 - Catacombs switch 1
+23 - Catacombs switch 2
+24 - Catacombs switch 3
+25 - Dukon Treasure 1
+26 - Dukon Treasure 2
+27 - Dukon Treasure 3
+28 - Catacombs switch 4
+29 - Catacombs switch 5
+30 - Catacombs chest 1
+31 - Catacombs chest 2
+32 - Catacombs chest 3
+33 - Guards not bothering us in castle
+34 - Talked to Rach once
+35 - Talked to Toldur once
+99 - End Game

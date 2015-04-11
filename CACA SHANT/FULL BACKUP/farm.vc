@@ -1,0 +1,233 @@
+void start()
+{
+	int luc;
+	int dec;
+	int endimg;
+	int x;
+
+	if(nFlags[99])
+	{
+		//Scroll by Thush's house with all the cows in the pen and all the grounds around the house filled with cows.
+		//spawn mass cows
+		for(x=0;x<30;x++)
+		{
+			EntitySpawn(Random(106, 163), Random(101, 130), "cow.chr");
+		}
+		
+		dec=1;
+		luc=100;
+		
+		cameratracking=0;
+		xwin = 1792;
+		ywin = 2088;
+		
+		while(ywin > 1280)
+		{
+			ywin--;
+			Render();
+
+			if(dec)
+			{
+				luc--;
+				
+				if(luc <=0)
+				{
+					dec = 0;
+				}
+			}
+			else
+			{
+				luc++;
+			}
+
+			SetLucent(luc);
+			PrintString(625, 500, screen, nFont, "Tiles");
+			PrintString(625, 532, screen, nFont, "Hahn");
+			PrintString(625, 548, screen, nFont, "McGrue");
+			PrintString(625, 564, screen, nFont, "Gyasi Grey (Ness)");
+			
+			PrintString(25, 100, screen, nFont, "Verge Created by");
+			PrintString(25, 132, screen, nFont, "Vecna");
+			
+			SetLucent(0);
+			
+			ShowPage();
+			wait(1);
+		}
+		
+		//Fade to black.
+		FadeOut(50);
+		endimg = LoadImage("end.png");
+		while(!b1)
+		{
+			Blit(0, 0, endimg, screen);
+			ShowPage();
+		}
+		FreeImage(endimg);
+		GameOver();
+		return;
+	}
+	
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong("town.it");
+	PlaySong(nMapSong);
+	
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	entity.speed[nPlayerEnt] = 200;
+	Warp(charx, chary);
+}
+
+void EnterPen()
+{
+	if(nFlags[0] == 0)
+	{
+		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": ....My cattle herd..........it's gone!");
+		TextBox(BatChars[0].sName + ": There's no hoof prints leading away, and the fence isn't broken. They must have been stolen, but theres no foot prints either. What's going on here...?");
+		TextBox(BatChars[0].sName + ": I should head to Lerang, someone there might have seen something.");
+		SetEntitiesPaused(0);
+		
+		sSceneName = "The cows! They're gone!";
+		nFlags[0] = 1;
+	}
+}
+
+void Leave()
+{
+	if(!nFlags[0])
+	{
+		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I should tend to the herd before I leave.");
+		SetEntitiesPaused(0);
+	}
+	else
+	{
+		Goto(195, 202, "world.map");
+	}
+}
+
+void ExitHouse()
+{
+	Warp(137, 149);
+}
+
+void EnterHouse()
+{
+	Warp(246, 122);
+}
+
+void DownStairs()
+{
+	Warp(248, 173);
+}
+
+void UpStairs()
+{
+	Warp(248, 103);
+}
+
+void Chest1()
+{
+	if(!nFlags[1])
+
+	{
+		GetItem(0, 5);
+		nFlags[1] = 1;
+	}
+}
+
+void Chest2()
+{
+	if(!nFlags[2])
+	{
+		GetItem(1, 1);
+		nFlags[2] = 1;
+	}
+}
+
+void Chest3()
+{
+	if(!nFlags[3])
+	{
+		GetItem(3, 1);
+		GetItem(4, 1);
+		nFlags[3] = 1;
+	}
+}
+
+void Chest4()
+{
+	if(!nFlags[4])
+	{
+		GetBling(100);
+		nFlags[4] = 1;
+	}
+}
+
+void Chest5()
+{
+	if(!nFlags[5])
+	{
+		GetBling(50);
+		nFlags[5] = 1;
+	}
+}
+
+void Bed()
+{
+	if(!nFlags[0])
+	{
+		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I just got up, time to milk the cows.");
+		SetEntitiesPaused(0);
+	}
+	else
+	{
+		FadeOut(50);
+		BatChars[nParty[0]].nHp = BatChars[nParty[0]].nMaxHp;
+		BatChars[nParty[1]].nHp = BatChars[nParty[1]].nMaxHp;
+		BatChars[nParty[2]].nHp = BatChars[nParty[2]].nMaxHp;
+		BatChars[nParty[0]].nMp = BatChars[nParty[0]].nMaxMp;
+		BatChars[nParty[1]].nMp = BatChars[nParty[1]].nMaxMp;
+		BatChars[nParty[2]].nMp = BatChars[nParty[2]].nMaxMp;
+		BatChars[nParty[0]].nDead = 0;
+		BatChars[nParty[1]].nDead = 0;
+		BatChars[nParty[2]].nDead = 0;
+		FadeIn(50);
+	}
+}
+
+void BookCase()
+{
+	string str2;
+
+	
+	if(nFlags[0])
+	{
+		str2 = "I should probably brush up on my fighting techniques before I leave.";
+		
+	}
+	else
+	{
+		str2 = "The cows can wait, and the books are always a good read.";
+	}
+	
+	if(TextBoxQuestion(BatChars[0].sName + ": I've got old books from my days as a soldier stacked up here.", str2, "", "", "Read?"))
+	{
+		SetEntitiesPaused(1);
+		TextBox("How to use skills");
+		TextBox("All characters have skills. They can range from a magical attack for a mage a healing spell for a healer, or a special attack for a fighter.");
+		TextBox("All skills have there own experience and proficiency level. The proficiency level of a skill determines how effective it is when used in combat.");
+		TextBox("Having a higher proficiency makes the skill more effective. For example, a higher profeciency lets the heal spell recover more HP or grants the charge up skill to provide better endurance and strength.");
+		TextBox("All skills will gain experience every time they are used, but it is also possible to manually add experience to a skill you wish to raise. This is called exp dumping.");
+		TextBox("When exp is dumped into a skill the exp is taken from the characters 'exp to next level' and added to the skills 'exp to next level'. It is possible to use 50% of the characters exp per level toward skills.");
+		TextBox("Although it is not required to manually add exp to your skills, it can help improve a skill that is necessary but isn't use very often. It can also be used to raise a skill from a low proficiency to a proficiency level where it is suitable");
+		SetEntitiesPaused(0);
+	}
+}

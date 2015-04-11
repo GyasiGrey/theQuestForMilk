@@ -1,0 +1,154 @@
+void EndGame()
+{
+	int endimg;
+	int keadik;
+	int img;
+	int i;
+	int fnt;
+	
+	
+	sCredit[0] = "pMilk.sProjectLead = 'Gyasi Grey';";
+	sCredit[1] = "pMilk.sCoder = 'Gyasi Grey';";
+	sCredit[2] = "pMilk.sTiles = 'Gyasi Grey';";
+	sCredit[3] = "pMilk.sCharacters = 'Gyasi Grey';";
+	sCredit[4] = "pMilk.sStory = 'Gyasi Grey';";
+	sCredit[5] = "pMilk.sMusic = 'Kitoh Grey' + 'Gyasi Grey';";
+	sCredit[6] = "pMilk.sThanks = 'McGrue for public domain tiles';";
+	sCredit[7] = "pMilk.sThanks += 'Interference for fonts';";
+	sCredit[8] = "pMilk.sThanks += 'VERGE community for not hating me';";
+	sCredit[9] = "pMilk.sThanks += 'for remaking this game';";
+	
+	TextBox("Acolyte: Noooo!!! It can't be!");
+	//acolyte runs out of the room
+	EntityMove(0, "U15");
+	while(entity.movecode[0])
+	{
+		Render();
+		ShowPage();
+	}
+	entity.x[0] = 0;
+	entity.y[0] = 0;
+	Render();
+	ShowPage();
+	wait(100);
+	//wait a sec
+	TextBox("Acolyte: Eaaarrrggghhhhh!!");
+	//spawn Keadik
+	keadik = EntitySpawn(28, 20, "guard.chr");
+	entity.x[keadik] += 8;
+	//Keadik walks in
+	EntityMove(keadik, "D2");
+	while(entity.movecode[keadik])
+	{
+		Render();
+		ShowPage();
+	}
+	
+	entity.face[nPlayerEnt] = 1;
+	entity.face[2] = 1;
+	entity.face[3] = 1;
+	
+	TextBox("Keadik: I have been looking for that villian for weeks now, I finally had the chance to run him through.");
+	TextBox("Keadik: Now what is the meaning of all this? Didn't I throw you all in the dungeon? Where are all the guards?");
+	TextBox(BatChars[0].sName + ": Keadik... impeccable timing as usual.");
+	TextBox("Keadik: Wait... what did you just say...? " + BatChars[0].sName + "?");
+	TextBox(BatChars[0].sName + ": Yes my old friend, it really is me.");
+	TextBox("Keadik: With all the high tensions around the castle I must not of recognized you. " + BatChars[0].sName + ", you certaintly look different from when I remember you.");
+	TextBox(BatChars[0].sName + ": Yes well much has changed since then.");
+	TextBox(BatChars[2].sName + ": I guess he was never under under the control of the Acolyte.");
+	TextBox(BatChars[0].sName + ": But first things first. I want to know where my the cows are.");
+	FadeOut(50);
+	
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong("end.mod");
+	PlaySong(nMapSong);
+	nMenuCanOpen = 0;
+	
+	//ending caca
+	endimg = LoadImage("end.png");
+	fnt = LoadFont("splashfont.png");
+	
+	img = NewImage(320, 240);
+	
+
+	//generate the image and fade it in
+
+	RectFill(0, 0, 320, 240, 0, img);
+	PrintCenter(160, 120, img, fnt, "Credits");
+	
+	FadeInImgCenter(200, img);
+	timer = 0;
+	while(timer < 300)
+	{
+		ShowPage();
+	}
+	FadeOutImg(200);
+	
+	//First page - ME
+	RectFill(0, 0, 320, 240, 0, img);
+	PrintString(30, 70, img, fnt, "Ness");
+	PrintString(35, 86, img, fnt, "Project Lead");
+	PrintString(35, 102, img, fnt, "Code");
+	PrintString(35, 118, img, fnt, "Story");
+	PrintString(35, 134, img, fnt, "Tiles");
+	Line(30, 84, 230, 84, RGB(200, 0, 0), img);
+	
+	FadeInImgCenter(200, img);
+	timer = 0;
+	while(timer < 300)
+	{
+		ShowPage();
+	}
+	FadeOutImg(200);
+
+	//2rd page - other stuff
+	RectFill(0, 0, 320, 240, 0, img);
+	PrintString(30, 70, img, fnt, "Music");
+	PrintString(35, 86, img, fnt, "Modarchive");
+	PrintString(35, 102, img, fnt, "Hero Rancher");
+	PrintString(35, 118, img, fnt, "Decide");
+	Line(30, 84, 230, 84, RGB(200, 0, 0), img);
+	
+	FadeInImgCenter(200, img);
+	timer = 0;
+	while(timer < 300)
+	{
+		ShowPage();
+	}
+	FadeOutImg(200);
+
+	//3nd page - Public VERGE stuff
+
+	RectFill(0, 0, 320, 240, 0, img);
+	PrintString(30, 70, img, fnt, "Thanks");
+	PrintString(35, 86, img, fnt, "McGrue - Public tiles");
+	PrintString(35, 102, img, fnt, "Interference - Fonts");
+	PrintString(35, 118, img, fnt, "Overkill - V3 Console");
+	PrintString(35, 134, img, fnt, "VERGE devs and Community");
+	Line(50, 84, 230, 84, RGB(200, 0, 0), img);
+	
+	FadeInImgCenter(200, img);
+	timer = 0;
+	while(timer < 300)
+	{
+		ShowPage();
+	}
+	FadeOutImg(200);
+
+	FadeInImg(50, endimg);
+	while(!b1)
+	{
+		blit(0, 0, endimg, screen);
+		ShowPage();
+	}
+
+	FreeImage(endimg);
+	FreeImage(img);
+	GameOver();
+	return;
+}

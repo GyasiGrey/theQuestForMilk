@@ -1,0 +1,137 @@
+#include "endgame.vc"
+
+void Start()
+{
+	int charone, chartwo;
+	
+	nMenuCanOpen = 0;
+	
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	entity.speed[0] = 300;
+	
+	nMapSong = LoadSong("acolyte.it");
+	PlaySong(nMapSong);
+
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+	
+	charone = EntitySpawn(charx, chary, "thush.chr");
+	chartwo = EntitySpawn(charx, chary, "thush.chr");
+	
+	EntityMove(charone, "R2D4");
+	EntityMove(chartwo, "L2D4");
+	EntityMove(nPlayerEnt, "D6");
+	
+	while(entity.movecode[charone] && entity.movecode[chartwo] && entity.movecode[nPlayerEnt])
+	{
+		Render();
+		ShowPage();
+	}
+	
+	entity.face[charone] = 2;
+	entity.face[chartwo] = 2;
+	entity.face[nPlayerEnt] = 2;
+
+	if(nFlags[10])
+	{
+		SetEntitiesPaused(1);
+		TextBox(BatChars[1].sName + ": Wait a second, do you hear that?");
+		TextBox(BatChars[2].sName + ": Yeah its chanting.");
+		//Step up Mr. Acolyte
+		SetEntitiesPaused(0);
+		EntityMove(0, "U2");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+		SetEntitiesPaused(1);
+		TextBox(BatChars[1].sName + ": Precisely. But those are not incantations that any mage would recite.");
+		TextBox("Acolyte: Ah I knew this day would come. Welcome to my humble abode.");
+		TextBox("Acolyte: It seems you have quite an experience magi among you. He is correct in that I am no magi...");
+		TextBox("Acolyte: I serve a god who has power that shall make this world tremble to its very foundation!");
+		TextBox(BatChars[0].sName + ": Is this why my former Kingdom is corrupt and old friends no longer recognize my face? Because of this false god's doing?!");
+		TextBox(BatChars[1].sName + ": No, the inhabitants of this castle are under the sway of a powerful mind control spell. That is this man's doing.");
+		TextBox("Acolyte: Ah you impress me more and more venerable magi.");
+		TextBox(BatChars[2].sName + ": And when were you going to tell us this " + BatChars[1].sName + "?");
+		TextBox(BatChars[1].sName + ": Um... now?");
+		TextBox("Acolyte: Enough!");
+		TextBox("Acolyte: You shall drive me mad with your endless prattle. And more importantly I was not finished listening to myself gloat.");
+		TextBox("Acolyte: As I was saying... in order to enter this realm for conquest it must take the form of an enormous demon and have its belly filled with one thing and one thing only.");
+		TextBox(BatChars[0].sName + ": Virgin's blood?");
+		TextBox(BatChars[2].sName + ": The first born of every village?");
+		TextBox(BatChars[1].sName + ": Earwax?");
+		TextBox(BatChars[0].sName + " & " + BatChars[2].sName + ": ...");
+		TextBox(BatChars[1].sName + ": Hey demons are weird.");
+		TextBox("Acolyte: Silence! This demon has an insatiable thirst... a thirst...");
+		TextBox("Acolyte: FOR MILK.");
+		TextBox(BatChars[1].sName + ": I still say Earwax makes more sense.");
+		TextBox("Acolyte: It matters not. You three shall never leave this room alive.");
+		TextBox(BatChars[0].sName + ": Yeah big talk, so you stole all the cows for a fetish of your pet demon. Good for you.");
+		TextBox(BatChars[2].sName + ": We'll just kill you before you summon the milk demon.");
+		TextBox(BatChars[0].sName + ": Bada bing bada boom.");
+		TextBox("Acolyte: Ah the arrogance of such fragile mortals. The demon is already summoned!");
+		SetEntitiesPaused(0);
+	}
+	else if(nFlags[11])
+	{
+		SetEntitiesPaused(1);
+		TextBox(BatChars[3].sName + ": A moment, do you notice that scent in the air?");
+		TextBox(BatChars[0].sName + ": No, I think that scent is you Toldur.");
+		TextBox(BatChars[3].sName + ": It is the stink of cows, and it comes from that man.");
+		SetEntitiesPaused(0);
+		//Step up Mr. Acolyte
+		EntityMove(0, "U2");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+		SetEntitiesPaused(1);
+		TextBox("Acolyte: Ah I knew this day would come. Welcome to my humble abode.");
+		TextBox(BatChars[3].sName + ": It is you who is responsible for the missing cows! Return the creatures you thief!");
+		TextBox("Acolyte: That simply will not do. They are necessary for the days ahead...");
+		TextBox("Acolyte: You see I serve a god who has power that shall make this world tremble to its very foundation!");
+		TextBox(BatChars[0].sName + ": That's all very well and good but why must you involve our, in addition my, cows in your about to be failed attempt at world domination?");
+		TextBox(BatChars[2].sName + ": Insane lusts for power usually blind people to what is right in front of them. Like a low branch or a stop sign.");
+		TextBox(BatChars[3].sName + ": A cop ticketed me for running a stop sign on the way to Drolith. I tried to tell him that I was stalking creatures of the wild but he wouldn't listen to me.");
+		TextBox(BatChars[0].sName + ": Yeah the Drolith cops can be real pains in the you know what.");
+		TextBox("Acolyte: Enough!");
+		TextBox("Acolyte: You shall drive me mad with your endless prattle. And more importantly I was not finished listening to myself gloat.");
+		TextBox("Acolyte: As I was saying... in order to enter this realm for conquest it must take the form of an enormous demon and have its belly filled with one thing and one thing only.");
+		TextBox(BatChars[0].sName + ": Virgin's blood?");
+		TextBox(BatChars[2].sName + ": The first born of every village?");
+		TextBox(BatChars[3].sName + ": Cow dung?");
+		TextBox(BatChars[0].sName + " & " + BatChars[2].sName + " : ...");
+		TextBox(BatChars[3].sName + ": It seemed to be the most logical answer.");
+		TextBox("Acolyte: Silence! This demon has an insatiable thirst... a thirst...");
+		TextBox("Acolyte: FOR MILK.");
+		TextBox(BatChars[3].sName + ": Close enough.");
+		TextBox("Acolyte: It matters not. You three shall never leave this room alive.");
+		TextBox(BatChars[0].sName + ": Yeah big talk, so you stole all the cows for a fetish of your pet demon. Good for you.");
+		TextBox(BatChars[2].sName + ": We'll just kill you before you summon the milk demon.");
+		TextBox(BatChars[0].sName + ": Bada bing bada boom.");
+		TextBox("Acolyte: Ah the arrogance of such fragile mortals. The demon is already summoned!");
+		SetEntitiesPaused(0);
+	}
+	
+	SetEntitiesPaused(1);
+	TextBox("Milk Demon: Prepare for your utter defeat!");
+	SetEntitiesPaused(0);
+
+	if(StartBattle(0-1, 19, 0-1, nParty[0], nParty[1], nParty[2], "cbkg.png", "boss.mod") == 0)
+	{
+		EndGame();
+	}
+	else
+	{
+		GameOver();
+	}
+	
+}

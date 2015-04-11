@@ -1,0 +1,79 @@
+--Fixes--
+NONE!!
+--Features--
+Use the screen capture method for the menues
+
+put little titles on the windows ala ff8
+
+Convert to 320*240?
+
+Something to better signify when monsters act (Like flashing monsters in FF6 or something)
+
+new battle animations (attack, fire etc)
+
+3d spell effects thingy
+
+Replace the chicken maze with something less anoying
+
+*****************COMPLETE******************
+*DONE* Go to the magic menu, then cancel. all char waits are incremented
+*DONE* Color a skill/spell that costs to much mp to signify it will fail
+*DONE* make the skill command and magic command use the same function
+*DONE* make 3 battle scroll options - Auto, Mixed, Manual
+*DONE* Button config - change what button does what - save to seprate file, openable from title screen, and config menu
+*DONE* fix shops (buying an item when you have exact change)
+*DONE* Fix the animals command
+*DONE* If a monster is killed by venom, you get 3(!) battle rewards
+*DONE* If you go to choose a target for an Item then cancel, the char that had the turn loses it
+*DONE* If you go to choose a target for a spell then cancel, the chars wait times are incremented
+*DONE* The battle item menu dosen't always come up....or skill/spell menu for that matter
+*DONE* add skill/spell delay - make the wait bar go backwards for skill/spell waiting 
+	-*DONE* skill/spell delay is in - needs backwards wait bar
+	-*DONE* Fix up all the commands so they don't choose a new target
+	-*DONE* make aggressive commands target enemies again
+	-*DONE*make monsters charge skills/spells
+*DONE* If an enemy is killed the tick before or the tick when a player gets the turn, they have to act to end the battle
+*DONE* Using an ether no uses up ......potion - NO REALLY THIS TIME
+*DONE* getting money after battle sometimes sets your money to 0
+*DONE* center over the targets in battle:
+	-*DONE* monsters
+	-*DONE* target pointer
+	-*Done* animations
+*DONE* make the title screen use menues instead of the text on the image
+*DONE* add (better) death effect
+*DONE* Redo the config menu cause you orverwrote it you fool....
+*DONE* move target pointer to point correctly for players (and monsters)
+*DONE* fix red lucent damage box thingies (got rid of them!)
+*DONE* If a char is killed while charging, remove the charge - set the wait time to 0 also
+*DONE* Choose target won't let you choose dead allies
+*DONE* If the target of a skill/spell is killed before the charging is done, choose a new random target
+*DONE* Fix using items from the menu
+*DONE* Give items the ability to not be used in the menu (eq and the like)
+*DONE* Fire acts like an instant
+*DONE* a new battle transition!
+*DONE* Fix after battle money gaining error
+*DONE* Change how ChooseTarget works - left and right move horizontally on the same side (players or monsters) - Up moves to the monster side, down moves to the player side
+*DONE* Make action text from the heal spell green
+*DONE* make wait bars not overflow
+*DONE* Fix using items in battle
+*DONE* fix the death sound
+*DONE* Change the menu gradient from drawing pixels to drawing lines
+*DONE* make the scaling factor in the supertext thingy %
+*DONE* autoscroll or manual for end of battle text stuff
+*DONE* make the level up window only appear once when a char gets multiple levels
+*DONE* fix the textbox gradient
+*DONE* fix status icons
+*DONE* Config menu - Interface done - needs code
+	-autoscroll or manual in battle
+	-battle speed
+	-text speed
+
+*NO!!* Restisances
+	-all chars (and monsters) have a base resist for all elements
+	-if resistance is 0% target takes full damage
+	-if resistance is -100% target takes double damage
+	-if resistance is 100% target takes no damage
+	-elements
+		-fire
+		-ice
+		-other stuff to make it not so FF

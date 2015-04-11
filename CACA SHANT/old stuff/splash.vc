@@ -1,0 +1,70 @@
+//YATTA!
+void Splash()
+{
+	int anim;
+
+	int yattaimg;
+
+	int yattasnd;
+	int vsplash;
+	int y;
+	int i;
+	int j;
+	
+
+	anim=LoadAnimation("nessanim.png", 32, 48);
+	yattaimg=LoadImage("nessyatta.png");
+	yattasnd=LoadSound("yatta.wav");
+	vsplash=LoadImage("vsplash.png");
+	
+	i=0;
+
+	j=0;
+	for(y=600;y>300;y-=5)
+	{
+		TBlitFrame(384, y, anim, i, screen);
+		ShowPage();
+		
+		j++;
+		if(j>=5)
+		{
+			if(i=1)
+				i=0;
+			else
+				i=1;
+				
+			j=0;
+		}
+		wait(5);
+		RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), RGB(0, 0, 0), screen);
+	}
+	
+	TBlit(295, 236, vsplash, screen);
+	TBlit(384, 300, yattaimg, screen);
+
+	SetLucent(25);
+
+	RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), RGB(255, 255, 255), screen);
+
+	SetLucent(0);
+	ShowPage();
+	Wait(3);
+	
+	RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), RGB(0, 0, 0), screen);
+	TBlit(295, 236, vsplash, screen);
+
+	TBlit(384, 300, yattaimg, screen);
+	ShowPage();
+	
+	wait(50);
+
+	PlaySound(yattasnd, 100);
+	wait(175);
+	
+	FadeOut(50);
+	
+	FreeAnimation(anim);
+	FreeImage(yattaimg);
+	FreeSound(yattasnd);
+	FreeImage(vsplash);
+}
