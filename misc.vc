@@ -1,0 +1,149 @@
+//random stuff that dosen't really fit anywhere else
+
+int nCenterX;
+int nCenterY;
+
+//returns the long name of a key
+string KeyName(int in)
+{
+	if(in==SCAN_ENTER){return "Enter";}
+	else if(in==SCAN_ESC){return "ESC";}
+	else if(in==SCAN_ALT){return "Alt";}
+	else {return str(in);}
+}
+
+//gets the x and y coords to center an anim around the target
+void BattleAnimXY(int def, int anim)
+{
+	if(def <= 2)
+	{
+		nCenterX = (65 + (100 * def)) - (anims[anim].sizex/2);
+		nCenterY = 222 - (anims[anim].sizey/2);
+	}
+	else if(def == 3)
+	{
+		nCenterX = MONSTER_1_X - (anims[anim].sizex/2);
+		nCenterY = MONSTER_1_Y - (anims[anim].sizey/2);
+	}
+	else if(def == 4)
+	{
+		nCenterX = MONSTER_2_X - (anims[anim].sizex/2);
+		nCenterY = MONSTER_2_Y - (anims[anim].sizey/2);
+	}
+	else if(def == 5)
+	{
+		nCenterX = MONSTER_3_X - (anims[anim].sizex/2);
+		nCenterY = MONSTER_3_Y - (anims[anim].sizey/2);
+	}
+}
+
+//simillar to above, but takes width and height instead of an anim
+void FindCenter(int def, int width, int height)
+{
+	if(def <= 2)
+	{
+		nCenterX = (65 + (100 * def)) - (width/2);
+		nCenterY = 222 - (height/2);
+	}
+	else if(def == 3)
+	{
+		nCenterX = MONSTER_1_X - (width/2);
+		nCenterY = MONSTER_1_Y - (height/2);
+	}
+	else if(def == 4)
+	{
+		nCenterX = MONSTER_2_X - (width/2);
+		nCenterY = MONSTER_2_Y - (height/2);
+	}
+	else if(def == 5)
+	{
+		nCenterX = MONSTER_3_X - (width/2);
+		nCenterY = MONSTER_3_Y - (height/2);
+	}
+}
+
+//loads 'buttons.sav' and sets the key config stuff
+void SetKeys()
+{
+	int btnOk, btnCancel, btnMenu;
+
+	int fhand;
+	
+	fhand = FileOpen("buttons.sav", FILE_READ);
+	if(!fhand)
+	{
+		//buttons.sav dosen't exist - make it
+		fhand = FileOpen("buttons.sav", FILE_WRITE);
+			
+		FileWriteByte(fhand, SCAN_ENTER);
+		FileWriteByte(fhand, SCAN_ALT);
+		FileWriteByte(fhand, SCAN_ESC);
+		//joysticker
+		FileWriteByte(fhand, 0);
+		FileWriteByte(fhand, 1);
+		FileWriteByte(fhand, 2);
+			
+		FileClose(fhand);
+		
+		return;			
+	}
+
+	//read the buttons and set them
+	SetButtonKey(1, FileReadByte(fhand));
+	SetButtonKey(2, FileReadByte(fhand));
+	SetButtonKey(3, FileReadByte(fhand));
+	SetButtonJB(1, FileReadByte(fhand));
+	SetButtonJB(2, FileReadByte(fhand));
+	SetButtonJB(3, FileReadByte(fhand));
+	
+	//yay for complex statements!
+}
+
+//scrolls the screen to an x y coord
+void MoveScreen(int x, int y, int speed)
+{
+	cameratracking = 0;
+
+	
+
+	while(xwin != x && ywin != y)
+	{
+		if(xwin > x)
+		{
+			xwin -= speed;
+		}
+		
+		if(xwin < x)
+		{
+			xwin += speed;
+		}
+		
+		if(ywin > y)
+		{
+			ywin -= speed;
+		}
+		
+		if(xwin < y)
+		{
+			ywin += speed;
+		}
+		
+		Render();
+		ShowPage();
+	}
+	
+
+	cameratracking = 1;
+}
+
+void MapMusicSwitch(string newsong)
+{
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong(newsong);
+	PlaySong(nMapSong);
+}

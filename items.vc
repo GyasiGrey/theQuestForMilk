@@ -1,0 +1,554 @@
+/*********************************
+items.vc
+Items and their functions
+**********************************/
+
+//holds items
+struct Item
+{
+	string sName;
+	string sBattleFuncString;
+	string sMenuFuncString;
+	int nCost;
+	
+	//for equipment - the abount of a bonus you get from equiping this stuff
+	int nMagicPow;
+	int nMagicDef;
+	int nMagicEvade;
+	int nMagicHit;
+	int nAttackPow;
+	int nDefense;
+	int nEvade;
+	int nHit;
+	int nHp;
+	int nMp;
+	
+	int nStatus;
+	
+	int nStatusPow; //used only for items that give status. determines the power of the status
+	
+	int nSlot; //what slow it equips in. -1 if not equipable
+	
+	int nMenuUse; //can it be used in the menu
+	int nBattleUse; //can it be used in battle
+	
+	int nCanEquip[10]; //=1 if char i can equip the item
+	
+	string sDescription; //item description
+	
+	int nPriority;	//for item sorting higher numbers go at top of list 
+			//space items by 10 units of priority so new ones can be added
+}
+
+//i went through the effort of defining the size of this array
+//and then set it to a static size
+//yeah...
+Item Items[MAX_ITEMS];
+
+int nItemIndex[MAX_ITEMS];
+int nItemCount[MAX_ITEMS];
+
+void GetItem(int index, int count)
+{
+	int i;
+	int found;
+	
+	if(index < 0)
+		return;
+		
+	found=0;
+	
+
+	for(i=0;i<MAX_ITEMS;i++)
+	{
+		if(nItemIndex[i] == index)
+		{
+			nItemCount[i]+=count;
+			found=1;
+		}
+	}
+	
+	//this is the first of this item were getting
+
+	if(found==0)
+	{
+		for(i=0;i<MAX_ITEMS;i++)
+		{
+			if(nItemIndex[i] < 0)
+			{
+				nItemIndex[i] = index;
+				nItemCount[i] = count;
+				i = MAX_ITEMS+1; //break
+			}
+		}
+	}
+	
+	if(count > 1)
+	{
+		TextBox("Got " + str(count) + " " + Items[index].sName + "s!");
+	}
+	else
+	{
+		TextBox("Got " + str(count) + " " + Items[index].sName + "!");
+	}
+	
+	SortItems();
+}
+
+void GetItemNoText(int index, int count)
+{
+	int i;
+	int found;
+	
+	if(index < 0)
+		return;
+		
+	found=0;
+	
+
+	for(i=0;i<MAX_ITEMS;i++)
+	{
+		if(nItemIndex[i] == index)
+		{
+			nItemCount[i]+=count;
+			found=1;
+		}
+	}
+	
+	//this is the first of this item were getting
+
+	if(found==0)
+	{
+		for(i=0;i<MAX_ITEMS;i++)
+		{
+			if(nItemIndex[i] < 0)
+			{
+				nItemIndex[i] = index;
+				nItemCount[i] = count;
+				i = MAX_ITEMS+1; //break
+			}
+		}
+	}
+	
+	SortItems();
+}
+
+int HasItem(int index)
+{
+	int i;
+	
+	if(index < 0)
+		return 0-1;
+	
+	for(i=0;i<MAX_ITEMS;i++)
+	{
+		if(nItemIndex[i] == index)
+		{
+			return i;
+		}
+	}
+	
+	return 0-1;
+}
+
+void RemoveItem(int index, int count)
+{
+	int i;
+
+	if(index < 0)
+		return;
+	
+	for(i=0;i<MAX_ITEMS;i++)
+	{
+		if(nItemIndex[i] == index)
+		{
+			nItemCount[i]-=count;
+			if(nItemCount[i] <= 0)
+			{
+				nItemIndex[i] = 0-1;
+			}
+			i = MAX_ITEMS+1; //berak;
+		}
+	}
+	
+	SortItems();
+}
+
+void SortItems()
+{
+	//a sort of my own design puts items with higher priority at the top
+	int index;
+	int i;
+	int tempindex, tempcount;
+	int sorted;
+	
+	index=0;
+
+	sorted=0;
+
+	
+	//while it's not sorted
+
+	while(sorted==0)
+	{
+		//set sorted to true so that if it never swaps, we leave the loop
+		sorted=1;
+		for(i=0;i<MAX_ITEMS-1;i++)
+		{
+			if(Items[nItemIndex[i]].nPriority < Items[nItemIndex[i+1]].nPriority)
+			{
+				//swap the items
+				tempindex = nItemIndex[i];
+				tempcount = nItemCount[i];
+
+				nItemIndex[i] = nItemIndex[i+1];
+				nItemCount[i] = nItemCount[i+1];
+
+				nItemIndex[i+1] = tempindex;
+				nItemCount[i+1] = tempcount;
+				
+				//had to swap, not sorted, do it again
+				sorted=0;
+			}
+		}
+	}
+}
+
+
+void InitItems()
+{
+	int i;
+	
+	Items[0].sName = "Potion";
+	Items[0].sBattleFuncString = "PotionBattleFunc";
+	Items[0].sMenuFuncString = "PotionMenuFunc";
+	Items[0].nCost = 50;
+	Items[0].nSlot = 0-1;
+	Items[0].nMenuUse = 1;
+	Items[0].nBattleUse = 1;
+	Items[0].sDescription = "Recoveres 100 Hp";
+	Items[0].nPriority = 100;
+
+	Items[1].sName = "Resurrection Scroll";
+	Items[1].sBattleFuncString = "ResurrectionScrollBattleFunc";
+	Items[1].sMenuFuncString = "ResurrectionScrollMenuFunc";
+	Items[1].nCost = 100;
+	Items[1].nSlot = 0-1;
+	Items[1].nMenuUse = 1;
+	Items[1].nBattleUse = 1;
+	Items[1].sDescription = "Brings a character back to life";
+	Items[1].nPriority = 80;
+	
+	Items[2].sName = "Ether";
+	Items[2].sBattleFuncString = "EtherBattleFunc";
+	Items[2].sMenuFuncString = "EtherMenuFunc";
+	Items[2].nCost = 75;
+	Items[2].nSlot = 0-1;
+	Items[2].nMenuUse = 1;
+	Items[2].nBattleUse = 1;
+	Items[2].sDescription = "Recoveres 20 Mp";
+	Items[2].nPriority = 90;
+	
+	Items[3].sName = "Cow Whip";
+	Items[3].nCost = 10;
+	Items[3].nAttackPow = 15;
+	Items[3].nHit = 10;
+	Items[3].nSlot = 0;
+	Items[3].nStatus = 0-1;
+	Items[3].nMenuUse = 0;
+	Items[3].nBattleUse = 0;
+	Items[3].sDescription = "It's used for disciplining bovines";
+	Items[3].nCanEquip[0] = 1;
+	Items[3].nPriority = 70;
+	
+	Items[4].sName = "Cloth Hat";
+	Items[4].nCost = 150;
+	Items[4].nDefense = 4;
+	Items[4].nSlot = 2;
+	Items[4].nStatus = 0-1;
+	Items[4].nMenuUse = 0;
+	Items[4].nBattleUse = 0;
+	Items[4].sDescription = "Keeps you warm in the winter";
+	Items[4].nCanEquip[0] = 1;
+	Items[4].nCanEquip[1] = 1;
+	Items[4].nCanEquip[2] = 1;
+	Items[4].nCanEquip[3] = 1;
+	Items[4].nPriority = 60;
+	
+	Items[5].sName = "Wood Shield";
+	Items[5].nCost = 150;
+	Items[5].nDefense = 2;
+	Items[5].nEvade = 15;
+	Items[5].nSlot = 1;
+	Items[5].nStatus = 0-1;
+	Items[5].nMenuUse = 0;
+	Items[5].nBattleUse = 0;
+	Items[5].sDescription = "Just might provide some protection";
+	Items[5].nCanEquip[0] = 1;
+	Items[5].nCanEquip[3] = 1;
+	Items[5].nPriority = 40;
+	
+	Items[6].sName = "Leather Armor";
+	Items[6].nCost = 250;
+	Items[6].nDefense = 8;
+	Items[6].nSlot = 3;
+	Items[6].nStatus = 0-1;
+	Items[6].nMenuUse = 0;
+	Items[6].nBattleUse = 0;
+	Items[6].sDescription = "It's...um...armor....";
+	Items[6].nCanEquip[0] = 1;
+	Items[6].nCanEquip[3] = 1;
+	Items[6].nPriority = 50;
+	
+	Items[7].sName = "Blue Green Ring";
+	Items[7].nCost = 100;
+	Items[7].nMagicHit = 7;
+	Items[7].nMagicPow = 7;
+	Items[7].nSlot = 4;
+	Items[7].nStatus = 0-1;
+	Items[7].nMenuUse = 0;
+	Items[7].nBattleUse = 0;
+	Items[7].sDescription = "Makes magic more effective";
+	Items[7].nCanEquip[1] = 1;
+	Items[7].nCanEquip[2] = 1;
+	Items[7].nPriority = 30;
+	
+	Items[8].sName = "Cloth Robe";
+	Items[8].nCost = 100;
+	Items[8].nDefense = 5;
+	Items[8].nSlot = 3;
+	Items[8].nStatus = 0-1;
+	Items[8].nMenuUse = 0;
+	Items[8].nBattleUse = 0;
+	Items[8].sDescription = "Cloth robes";
+	Items[8].nCanEquip[1] = 1;
+	Items[8].nCanEquip[2] = 1;
+	Items[8].nPriority = 51;
+
+	Items[9].sName = "Long Staff";
+	Items[9].nCost = 250;
+	Items[9].nAttackPow = 20;
+	Items[9].nHit = 10;
+	Items[9].nSlot = 0;
+	Items[9].nStatus = 0-1;
+	Items[9].nMenuUse = 0;
+	Items[9].nBattleUse = 0;
+	Items[9].sDescription = "A staff. Longer then normal";
+	Items[9].nCanEquip[3] = 1;
+	Items[9].nPriority = 71;
+	
+	Items[10].sName = "Mental Ring";
+	Items[10].nCost = 300;
+	Items[10].nSlot = 4;
+	Items[10].nStatus = 6;
+	Items[10].nStatusPow = 5;
+	Items[10].nMenuUse = 0;
+	Items[10].nBattleUse = 0;
+	Items[10].sDescription = "Recovers Mp durring battle";
+	Items[10].nCanEquip[1] = 1;
+	Items[10].nCanEquip[2] = 1;
+	Items[10].nPriority = 31;
+	
+
+
+	for(i=0;i<MAX_ITEMS;i++)
+	{
+		nItemIndex[i] = 0-1;
+		nItemCount[i] = 0-1;
+	}
+}
+
+void ResurrectionScrollBattleFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	int basedamage;
+	
+	ChooseTarget();
+	
+	//they be hitten cancel yo
+	if(target < 0)
+		return;
+
+	if(InBattleChars[target].nDead)
+	{
+		PlaySound(nHealSound, 100);
+
+		BattleAnimXY(target, nHealAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen green
+		TintOn(RGB(0, 255, 0), 70);
+	
+		//animate me!
+		PlayAnim(x, y, nHealAnim, 4, screen, 15);
+			
+		//turn off the tint
+		TintOff();
+
+	
+		//revived with 50% hp
+		basedamage = ((inBattleChars[target].nMaxHp * 100) * 5)/1000;
+			
+		inBattleChars[target].nHp = basedamage;
+		inbattleChars[target].nDead = 0;
+	
+	
+		if(inBattleChars[target].nHp > inBattleChars[target].nMaxHp)
+			inBattleChars[target].nHp = inBattleChars[target].nMaxHp;
+			
+		ShowActionText(str(basedamage), target, RGB(0, 255, 0));
+	}
+	else
+	{
+		//miss
+		ShowActionText("Miss", target, RGB(255, 0, 0));
+	}
+		
+	RemoveItem(1, 1);
+}
+
+void ResurrectionScrollMenuFunc()
+{
+	if(BatChars[target].nDead)
+	{
+		BatChars[target].nDead = 0;
+		BatChars[target].nHp += BatChars[target].nMaxHp/2;
+	
+		RemoveItem(1, 1);
+	}
+}
+
+
+void PotionBattleFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	int basedamage;
+	
+	ChooseTarget();
+	
+	//they be hitten cancel yo
+	if(target < 0)
+		return;
+
+
+	if(!InBattleChars[target].nDead)
+	{
+		//play the sound
+		PlaySound(nHealSound, 100);
+		
+		BattleAnimXY(target, nHealAnim);
+		x = nCenterX;
+		y = nCenterY;
+	
+		//tint the screen green
+		TintOn(RGB(0, 255, 0), 70);
+		
+		//animate me!
+		PlayAnim(x, y, nHealAnim, 3, screen, 15);
+		
+		//turn off the tint
+		TintOff();
+
+		//calculate damage
+		basedamage = 100; 
+			
+		inBattleChars[target].nHp = inBattleChars[target].nHp + basedamage;
+	
+		if(InBattleChars[target].nHp >InBattleChars[target].nMaxHp)
+			InBattleChars[target].nHp = InBattleChars[target].nMaxHp;
+			
+		ShowActionText(str(basedamage), target, RGB(0, 255, 0));
+	}
+	else
+	{
+		//miss
+		ShowActionText("Miss", target, RGB(0, 255, 0));
+	}
+	
+	RemoveItem(0, 1);
+}
+
+void PotionMenuFunc()
+{
+	if(!BatChars[target].nDead)
+	{
+		if(BatChars[target].nHp != BatChars[target].nMaxHp)
+		{
+			BatChars[target].nHp += 100;
+	
+	
+			if(BatChars[target].nHp >= BatChars[target].nMaxHp)
+				BatChars[target].nHp = BatChars[target].nMaxHp;
+			
+			RemoveItem(0, 1);
+		}
+	}
+}
+
+void EtherBattleFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	int basedamage;
+	
+	ChooseTarget();
+	
+	//they be hitten cancel yo
+	if(target < 0)
+		return;
+
+	
+	//play the sound
+	PlaySound(nHealSound, 100);
+		
+	BattleAnimXY(target, nHealAnim);
+	x = nCenterX;
+	y = nCenterY;
+	
+	//tint the screen purple?
+	TintOn(RGB(255, 255, 0), 70);
+	
+	//animate me!
+	PlayAnim(x, y, nHealAnim, 3, screen, 15);
+		
+	//turn off the tint
+	TintOff();
+
+	//calculate damage
+	basedamage = 20; 
+			
+	inBattleChars[target].nMp = inBattleChars[target].nMp + basedamage;
+	
+	if(InBattleChars[target].nMp >InBattleChars[target].nMaxMp)
+		InBattleChars[target].nMp = InBattleChars[target].nMaxMp;
+
+	RemoveItem(2, 1);
+	
+	ShowActionText(str(basedamage), target, RGB(255, 255, 0));
+}	
+
+void EtherMenuFunc()
+{
+	if(!BatChars[target].nDead)
+	{
+		if(BatChars[target].nMp != BatChars[target].nMaxMp)
+		{
+			BatChars[target].nMp += 20;
+	
+			if(BatChars[target].nMp >= BatChars[target].nMaxMp)
+				BatChars[target].nMp = BatChars[target].nMaxMp;
+			
+			RemoveItem(2, 1);
+		}
+	}
+}
+

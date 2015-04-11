@@ -1,0 +1,272 @@
+void Start()
+{
+	sSceneName = "Hunting for the Acolyte";
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong("catacombs.it");
+	PlaySong(nMapSong);
+
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+	
+	nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	
+	if(nFlags[22])
+	{
+		Switch1();
+	}
+	else
+	{
+		Switch1();
+		Switch1();
+	}
+	
+	if(nFlags[23])
+	{
+		Switch2();
+		Switch2();
+	}
+	else
+	{
+		Switch2();
+		Switch2();
+		Switch2();
+	}
+	
+	if(nFlags[24])
+	{
+		Switch3();
+	}
+	else
+	{
+		Switch3();
+		Switch3();
+	}
+
+	if(nFlags[28])
+	{
+		Switch4();
+		Switch4();
+	}
+	else
+	{
+		Switch4();
+		Switch4();
+		Switch4();
+	}
+
+	if(nFlags[29])
+	{
+		Switch5();
+		Switch5();
+	}
+	else
+	{
+		Switch5();
+		Switch5();
+		Switch5();
+	}
+	entity.speed[nPlayerEnt] = 200;
+
+}
+
+void Leave()
+{
+	TextBox(BatChars[0].sName + ": Not back that way, the guards will be after us!");
+	
+	EntityMove(nPlayerEnt, "R1");
+	
+	while(entity.movecode[nPlayerEnt])
+	{
+		Render();
+		ShowPage();
+	}
+}
+
+void MoveBridge(int x, int y, int flag)
+{
+	if(!nFlags[flag])
+	{
+		//tiles to add the bridge
+		SetTile(x-2, y, 1, 154);
+		SetTile(x-1, y, 1, 154);
+		SetTile(x-2, y+1, 1, 154);
+		SetTile(x-1, y+1, 1, 154);
+
+		SetTile(x+3, y, 1, 154);
+		SetTile(x+2, y, 1, 154);
+		SetTile(x+3, y+1, 1, 154);
+		SetTile(x+2, y+1, 1, 154);
+
+		//tiles to remove the bridge
+		SetTile(x, y-2, 1, 0);
+		SetTile(x, y-1, 1, 0);
+		SetTile(x+1, y-2, 1, 0);
+		SetTile(x+1, y-1, 1, 0);
+
+		SetTile(x, y+3, 1, 0);
+		SetTile(x, y+2, 1, 0);
+		SetTile(x+1, y+3, 1, 0);
+		SetTile(x+1, y+2, 1, 0);
+
+		//set the new obs
+		SetObs(x-2, y-1, 1);
+		SetObs(x-1, y-1, 1);
+		SetObs(x, y-1, 1);
+		SetObs(x+1, y-1, 1);
+		SetObs(x+2, y-1, 1);
+		SetObs(x+3, y-1, 1);
+
+		SetObs(x-2, y+2, 1);
+		SetObs(x-1, y+2, 1);
+		SetObs(x, y+2, 1);
+		SetObs(x+1, y+2, 1);
+		SetObs(x+2, y+2, 1);
+		SetObs(x+3, y+2, 1);
+
+		//remove the old obs
+		SetObs(x-2, y, 0);
+		SetObs(x-2, y-1, 0);
+
+		SetObs(x+3, y, 0);
+		SetObs(x+3, y-1, 0);
+
+		nFlags[flag] = 1;
+	}
+	else
+	{
+		//tiles to remove the bridge
+		SetTile(x-2, y, 1, 0);
+		SetTile(x-1, y, 1, 0);
+		SetTile(x-2, y+1, 1, 0);
+		SetTile(x-1, y+1, 1, 0);
+
+		SetTile(x+3, y, 1, 0);
+		SetTile(x+2, y, 1, 0);
+		SetTile(x+3, y+1, 1, 0);
+		SetTile(x+2, y+1, 1, 0);
+
+		//tiles to add the bridge
+		SetTile(x, y-2, 1, 154);
+		SetTile(x, y-1, 1, 154);
+		SetTile(x+1, y-2, 1, 154);
+		SetTile(x+1, y-1, 1, 154);
+
+		SetTile(x, y+3, 1, 154);
+		SetTile(x, y+2, 1, 154);
+		SetTile(x+1, y+3, 1, 154);
+		SetTile(x+1, y+2, 1, 154);
+
+		//set the new obs
+		SetObs(x-2, y-1, 0);
+		SetObs(x-1, y-1, 0);
+		SetObs(x, y-1, 0);
+		SetObs(x+1, y-1, 0);
+		SetObs(x+2, y-1, 0);
+		SetObs(x+3, y-1, 0);
+
+		SetObs(x-2, y+2, 0);
+		SetObs(x-1, y+2, 0);
+		SetObs(x, y+2, 0);
+		SetObs(x+1, y+2, 0);
+		SetObs(x+2, y+2, 0);
+		SetObs(x+3, y+2, 0);
+
+		//remove the old obs
+		SetObs(x-2, y, 1);
+		SetObs(x-2, y-1, 1);
+
+		SetObs(x+3, y, 1);
+		SetObs(x+3, y-1, 1);
+
+		nFlags[flag] = 0;
+	}
+}
+
+void Switch1()
+{
+	MoveBridge(100, 77, 22);
+}
+
+void Switch2()
+{
+	MoveBridge(110, 81, 23);
+}
+
+void Switch3()
+{
+	MoveBridge(124, 85, 24);
+}
+
+void Switch4()
+{
+	MoveBridge(138, 85, 28);
+}
+
+void Switch5()
+{
+	MoveBridge(134, 89, 29);
+}
+
+void Leave()
+{
+	Goto(125, 90, "chamber.map");
+}
+
+void Battle()
+{
+	int rand;
+	
+	nBattleSteps--;
+	if(nBattleSteps<=0)
+	{
+		rand = Random(1, 100);
+		if(rand < 50)
+		{
+			if(StartBattle(13, 0-1, 13, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		else
+		{
+			if(StartBattle(0-1, 12, 0-1, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	}
+}
+
+void Chest1()
+{
+	if(!nFlags[30])
+	{
+		GetItem(1, 1);
+		nFlags[30] = 1;
+	}
+}
+
+void Chest2()
+{
+	if(!nFlags[31])
+	{
+		GetItem(1, 1);
+		nFlags[31] = 1;
+	}
+}
+
+void Chest3()
+{
+	if(!nFlags[32])
+	{
+		GetItem(2, 1);
+		nFlags[32] = 1;
+	}
+}

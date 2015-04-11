@@ -1,0 +1,365 @@
+void start()
+{
+	sSceneName = "Falsely incarcerated";
+	
+	MapMusicSwitch("drip.it");
+
+	if(nFlags[10])
+	{
+		EntitySpawn(40, 31, "rach.chr");
+	}
+	else if(nFlags[11])
+	{
+		EntitySpawn(40, 31, "toldur.chr");
+	}
+	
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+}
+
+void TalkGuard()
+{
+	if(!nFlags[6])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": Guard! Guard!");
+//		SetEntitiesPaused(0);
+		//guard walks over
+		Render();
+		ShowPage();
+		EntityMove(0, "R6U5");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I " + BatChars[0].sName + ", am captan of the Drolithan knights and demand to be freed!");
+		TextBox("Guard: You are not a captan anymore, just a common criminal.");
+		TextBox(BatChars[0].sName + ": WHAT?!");
+//		SetEntitiesPaused(0);
+		nFlags[6] = 1;
+		//guard walks back
+		Render();
+		ShowPage();
+		EntityMove(0, "D5L6F0");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else if(!nFlags[7])
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": Guard!");
+//		SetEntitiesPaused(0);
+		//guard walks over
+		Render();
+		ShowPage();
+		EntityMove(0, "R6U5");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+//		SetEntitiesPaused(1);
+		TextBox("Guard: What now?");
+		TextBox(BatChars[0].sName + ": If you do not open this jail, I will break the bars myself and kill you with my bare hands!");
+		TextBox("Guard: Look, I'm under strict orders to keep you in here no matter what.");
+		TextBox("Guard: I'm not letting you out.");
+//		SetEntitiesPaused(0);
+		nFlags[7] = 1;
+		//guard walks back
+		Render();
+		ShowPage();
+		EntityMove(0, "D5L6F0");
+		while(entity.movecode[0])
+		{
+			Render();
+			ShowPage();
+		}
+	}
+	else
+	{
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": Guard!");
+//		SetEntitiesPaused(0);
+		Render();
+		Wait(100);
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": He's ignoring me!");
+//		SetEntitiesPaused(0);
+	}
+}
+
+void TalkOthers()
+{
+//	SetEntitiesPaused(1);
+	if(TextBoxQuestion("Check on " + BatChars[2].sName + "?", "", "", "", BatChars[2].sName + "?"))
+	{
+		if(!nFlags[8])
+		{
+			TextBox(BatChars[0].sName + ": " + BatChars[2].sName + ", are you ok in there?");
+			TextBox(BatChars[2].sName + ": Besides how dirty, smelly, and rat infested this hole is yeah I'm having a blast.");
+			nFlags[8] = 1;
+		}
+		else
+		{
+			TextBox(BatChars[2].sName + ": Dirty.......");
+		}
+	}
+//	SetEntitiesPaused(0);
+	
+
+//	SetEntitiesPaused(1);
+	if(nFlags[10])
+	{
+		if(TextBoxQuestion("Check on " + BatChars[1].sName + "?", "", "", "", BatChars[1].sName + "?"))
+		{
+			if(!nFlags[9])
+			{
+				TextBox(BatChars[0].sName + ": " + BatChars[2].sName + ", would you check on " + BatChars[1].sName + " for me?");
+				TextBox(BatChars[2].sName + ": Ok hold on.");
+//				SetEntitiesPaused(0);
+				
+				cameratracking=0;
+				//pan the screen untill it's over alea
+				while(xwin < entity.x[1] - (ImageWidth(screen)/2))
+				{
+					xwin++;
+					Render();
+					ShowPage();
+					wait(1);
+				}
+
+				//alea walks over, with the screen following
+				EntityMove(1, "R3");
+				while(entity.movecode[1])
+				{
+					xwin=entity.x[1] - (ImageWidth(screen)/2);
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+				
+//				SetEntitiesPaused(1);
+				TextBox(BatChars[1].sName + ": If the laden swallow uses the correct weight distrobution it would beat the unladen swallow by at least 3 chickens lengths.");
+				Wait(100);
+				TextBox(BatChars[1].sName + ": You raise a good point, but your logic is flawed. Holding the coconut between them would only cause the swallows");
+				TextBox("to fight over who carries how much weight.");
+				Wait(100);
+				TextBox(BatChars[1].sName + ": Well if you want to get into swallow politics, then yeah");
+				TextBox("but that's a whole different conversation...");
+//				SetEntitiesPaused(0);
+
+				//alea walks back
+				EntityMove(1, "L3");
+				while(entity.movecode[1])
+				{
+					xwin=entity.x[1] - (ImageWidth(screen)/2);
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+				
+				//pan the screen back untill it's over thush
+				while(xwin > entity.x[nPlayerEnt] - (ImageWidth(screen)/2))
+				{
+					xwin--;
+					Render();
+					ShowPage();
+					wait(1);
+				}
+
+				TextBox(BatChars[2].sName + ": Mabey we should leave " + BatChars[1].sName + " alone for a while");
+				cameratracking=1;
+				
+				nFlags[9] = 1;
+			}
+			else
+			{
+//				SetEntitiesPaused(1);
+				TextBox(BatChars[0].sName + ": " + BatChars[2].sName + ", would you check on " + BatChars[1].sName + " for me?");
+				TextBox(BatChars[2].sName + ": .....I don't want to interupt his conversation.");
+				TextBox(BatChars[0].sName + ": Who's he talking to?");
+				TextBox(BatChars[2].sName + ": Well it's not me, and it's not you....");
+//				SetEntitiesPaused(0);
+			}
+		}
+	}
+	else if(nFlags[11])
+	{
+		if(TextBoxQuestion("Check on " + BatChars[3].sName + "?", "", "", "", BatChars[3].sName + "?"))
+		{
+			if(!nFlags[9])
+			{
+				TextBox(BatChars[0].sName + ": " + BatChars[2].sName + ", would you check on " + BatChars[3].sName + " for me?");
+				TextBox(BatChars[2].sName + ": Ok hold on.");
+//				SetEntitiesPaused(0);
+				
+				cameratracking=0;
+				//pan the screen untill it's over alea
+				while(xwin < entity.x[1] - (ImageWidth(screen)/2))
+				{
+					xwin++;
+					Render();
+					ShowPage();
+					wait(1);
+				}
+
+				//alea walks over, with the screen following
+
+				EntityMove(1, "R3");
+
+				while(entity.movecode[1])
+				{
+					xwin=entity.x[1] - (ImageWidth(screen)/2);
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+				
+//				SetEntitiesPaused(1);
+				TextBox(BatChars[3].sName + ": Is this what it feels like my brothers and sisters? To be locked inside of a cage...");
+				TextBox(BatChars[3].sName + ": No living thing should have to suffer this cruel punishment.");
+				TextBox(BatChars[3].sName + ": The air... it suddenly seems thin... The walls are closing in on me!");
+//				SetEntitiesPaused(0);
+
+				//alea walks back
+				EntityMove(1, "L3");
+				while(entity.movecode[1])
+				{
+					xwin=entity.x[1] - (ImageWidth(screen)/2);
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+				
+				//pan the screen back untill it's over thush
+				while(xwin > entity.x[nPlayerEnt] - (ImageWidth(screen)/2))
+				{
+					xwin--;
+					Render();
+					ShowPage();
+					wait(1);
+				}
+
+				cameratracking=1;
+				
+				nFlags[9] = 1;
+			}
+			else
+			{
+//				SetEntitiesPaused(0);
+				//alea walks over
+				EntityMove(1, "R5");
+				cameratracking=0;
+				while(entity.movecode[1])
+				{
+					xwin+=10;
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+
+//				SetEntitiesPaused(1);
+				TextBox(BatChars[3].sName + ": ...");
+//				SetEntitiesPaused(0);
+
+				//alea walks back
+				EntityMove(1, "L5");
+				while(entity.movecode[1])
+				{
+					xwin-=10;
+					Render();
+					ShowPage();
+					Wait(1);
+				}
+				
+				cameratracking=1;
+			}
+		}
+	}
+//	SetEntitiesPaused(0);
+}
+
+void Bed()
+{
+	int otherchar;
+	
+//	SetEntitiesPaused(1);
+	If(TextBoxQuestion(BatChars[0].sName + ": Guess I have nothing better to do then sleep....", "", "", "", "Sleep?"))
+	{
+		BatChars[nParty[0]].nHp = BatChars[nParty[0]].nMaxHp;
+		BatChars[nParty[0]].nMp = BatChars[nParty[0]].nMaxMp;
+		BatChars[nParty[0]].nDead = 0;
+
+		BatChars[nParty[1]].nHp = BatChars[nParty[1]].nMaxHp;
+		BatChars[nParty[1]].nMp = BatChars[nParty[1]].nMaxMp;
+		BatChars[nParty[1]].nDead = 0;
+
+		BatChars[nParty[2]].nHp = BatChars[nParty[2]].nMaxHp;
+		BatChars[nParty[2]].nMp = BatChars[nParty[2]].nMaxMp;
+		BatChars[nParty[2]].nDead = 0;
+		FadeOut(50);
+		
+		wait(100);
+		
+		if(nFlags[10])
+		{
+			TextBox("*THOK*");
+			TextBox(BatChars[0].sName + ": What was that?");
+//			SetEntitiesPaused(0);
+			
+			EntityMove(nPlayerEnt, "D6");
+			//spawn touldur
+			otherchar = EntitySpawn(38, 43, "toldur.chr");
+			EntityMove(otherchar, "L10");
+			
+			while(entity.movecode[otherchar] || entity.movecode[nPlayerEnt])
+			{
+				Render();
+				ShowPage();
+			}
+			
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[0].sName + ": " + BatChars[3].sName + "?");
+			TextBox(BatChars[3].sName + ": I could not let you stay in this dungeon. I have done some scouting and learned that the majority of the castle is under the sway of an acolyte. He hides within the depths of the castle.");
+			TextBox(BatChars[3].sName + ": I'll let you out and hold off the guards so you can get down there.");
+//			SetEntitiesPaused(0);
+
+			Goto(21, 34, "catacombs.map");			
+		}
+		
+		if(nFlags[11])
+		{
+//			SetEntitiesPaused(1);
+			TextBox("*ccchhHHHING!* KAPOW!");
+			TextBox(BatChars[0].sName + ": What was that?");
+//			SetEntitiesPaused(0);
+			
+			EntityMove(nPlayerEnt, "D6");
+			//spawn rach
+			otherchar = EntitySpawn(38, 43, "rach.chr");
+			EntityMove(otherchar, "L10");
+			
+			while(entity.movecode[otherchar] || entity.movecode[nPlayerEnt])
+			{
+				Render();
+				ShowPage();
+			}
+			
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[0].sName + ": " + BatChars[1].sName + "?");
+			TextBox(BatChars[1].sName + ": At your service. I've been sneaking around the castle and found that the higher ups are under the mind control of an acolyte who has devised a sanctum under the castle.");
+			TextBox(BatChars[1].sName + ": I'll let you out and hold off the guards so you can get down there.");
+//			SetEntitiesPaused(0);
+
+			Goto(21, 34, "catacombs.map");			
+		}
+	}
+//	SetEntitiesPaused(0);
+}

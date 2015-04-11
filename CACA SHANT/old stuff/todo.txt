@@ -1,0 +1,128 @@
+Playtest
+
+clean dir for upload
+
+********************MABEY************************************
+steal hero rancher chr's?
+
+redo banish anim
+
+*CLEAN EDGES* worldmap
+
+*Add Trees* Thush's farm
+
+Birds that fly away when you get to close
+
+Equipment
+
+-*DOCKS* lerang - *MABEY*
+
+********************DONE BELOW THIS LINE*********************
+*DONE* Jail dialog
+
+*DONE* town inards
+
+*DONE* Cleanup music files
+
+*DONE* Finish up catacombs
+
+*DONE* menu sounds
+
+*DONE* Fix item error (use up all of one item, then use an item in battle)
+
+*DONE* End game
+
+*DONE* acolytes chambers
+
+*DONE* Fix load menu (go into it, then cancel, chose a save, then cancel)
+
+*DONE* Fix the damn item boxes you fool
+
+*DONE* make down pointer anim work on a timer
+
+*DONE* PauseEntities for dialog
+
+*DONE* dukon mountains
+
+*DONE* castle
+
+*DONE* jail
+
+*DONE* catacombs
+
+*DONE* *SCRIPT* House2
+
+*DONE* *SCRIPT* Police
+
+*DONE* *SCRIPT* Magic Guild
+
+*DONE* *SCRIPT* Restaurant
+
+*DONE* Make heal in menu more powerful
+
+*DONE* Fix edges on generated windows
+
+*DONE* Rip Lava cave tiles from grue for the caves
+
+*DONE* using a skill in the menu
+
+*DONE* generate the textbox once
+
+*DONE* name of part in story on save menu (like crono trigger)
+
+*DONE* Fix save/load game
+
+*DONE* Shops
+
+*DONE* Put skills in game
+	-*DONE* Thush
+		-*DONE* Charge Up - Gives himself enhance physical
+	-*DONE* Alea
+		-*DONE* Heal - Recovers HP
+		-*DONE* Cure Venom - Cures venom (duh)
+		-*DONE* Revive - Come back to life
+		-*DONE* Banish - 10% chance of instakill, 90% chance os nasty status ailment - dosen't appear untill after 			scene with guard before the mountains
+
+	-*DONE* Rhac
+		-*DONE* Fire
+		-*DONE* Venom
+		-*MABEY* Summon
+		-*DONE* Invisible - Target is invis, and can't be targeted by enemies for 2 turns
+
+	-Toldur
+		-*DONE* Animals - Forest creatures go on a rampage - Animal is chosen at random
+			-*DONE* Black Bear - 2* damage
+			-*DONE* Forest Sprite - Heal all allies
+			-*DONE* Skunk - Venoms all enemies
+		-*DONE* Hide - when hiding your evade goes way up- if he takes an action while hiding he stops hiding
+		-*DONE* Ambush - can only be used when hiding, deals triple damage
+			
+*DONE* Something of a party, system 3 variables that holds the indexes of what chars are in the party
+
+*DONE* Title screen
+	-*DONE* new game
+	-*DONE* load game
+
+*DONE* Add status screen
+
+*DONE* add skill screen
+
+*DONE* second skill screen
+
+*DONE* exp dumping
+
+*DONE* add exit check screen
+
+*DONE* save feature
+
+*DONE* load feature
+
+*DONE* save menu
+
+*DONE* load menu
+
+*DONE* money
+
+*DONE* window to show amt of money
+
+*DONE* make a story :[

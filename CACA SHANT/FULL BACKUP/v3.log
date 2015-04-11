@@ -1,0 +1,19 @@
+VC System Compilation stats: 
+232 ints (14604 expanded), 17 strings (305 expanded), 162 functions, 8607 total lines
+
+compiled castle.map, (266 lines)  number of funcs is 10
+compiled catacombs.map, (271 lines)  number of funcs is 13
+compiled chamber.map, (196 lines)  number of funcs is 2
+compiled drolith.map, (687 lines)  number of funcs is 30
+compiled dukon.map, (279 lines)  number of funcs is 14
+compiled farm.map, (232 lines)  number of funcs is 14
+compiled jail.map, (323 lines)  number of funcs is 4
+compiled lerang.map, (252 lines)  number of funcs is 15
+compiled world.map, (103 lines)  number of funcs is 8
+console engine by overkill.
+
+verge³ build 08/01/04
+
+opening of save0.sav for reading failed.
+nBattles assigned:
+0

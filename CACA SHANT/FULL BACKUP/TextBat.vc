@@ -1,0 +1,1642 @@
+#define NUM_BOUNCY 16
+
+//the x and y coords that monsters are centered around
+//#defined because I use them a lot
+#define MONSTER_1_X 210
+#define MONSTER_1_Y 310
+
+#define MONSTER_2_X 360
+#define MONSTER_2_Y 260
+
+#define MONSTER_3_X 510
+#define MONSTER_3_Y 310
+
+#include "Chars.vc"
+#include "items.vc"
+#include "commands.vc"
+#include "status.vc"
+
+#include "animation.vc"
+
+//the lines of text that go in the box on top
+string sBattleText;
+
+//the pointer
+int nPointerPos;
+int nTargetPointerPos;
+
+//how long to hold up the render process before continuing
+int nWait;
+
+//what chars are in battle
+int nPlayers[3];
+int nMonsters[3];
+
+//the back buffer (double buffering biznitch!)
+int nBackBuffer;
+
+//which character (or monster) has the turn
+int nTurn;
+
+//is the game running (0 = true)
+int nRunning;
+
+//used for the command funcs. before they are called the attacker and target are put in these
+int attacker;
+int target;
+
+//fake bool. = 1 when the target pointer is shown
+int nTargetPointer;
+
+//for the magic menu
+int nMagicPointerPos;
+
+//background image
+int nBackground;
+
+//animations
+int nAttackAnim;
+int nFireAnim;
+int nHealAnim;
+int nVenomAnim;
+
+//icons
+int nVenomIcon;
+int nWeakIcon;
+int nMagicIcon;
+int nPhysicalIcon;
+int nInvisIcon;
+int nHideIcon;
+
+//sounds
+int nAttackSound;
+int nFireSound;
+int nDeathSound;
+int nMissSound;
+int nVenomSound;
+int nBanishSound;
+int nWeakSound;
+int nSpellMissSound;
+int nReadySound;
+
+//The lucency of the monsters (used for monster death)
+int nMonsterLuc[3];
+
+//for tinting
+int nTint;
+int nTintColor;
+int nTintLuc;
+
+//the current command
+int nCommand;
+//the current item
+int nItem;
+//the current spell
+int nSpell;
+
+//what monster is acting, so I can make them step forward
+int nMonsterActing;
+
+//=1 when the menu pointer is drawn
+int nPointerOn;
+
+int nDrawPlayerWindow;
+
+//generated windows
+int nTopWindowImg;
+int nMagicWindowImg;
+int nPlayerWindowImg;
+int nPlayerCommandWindowImg;
+
+//battle song
+int nBattleSong;
+
+//bouncy digit table
+int nBouncy[NUM_BOUNCY];
+
+//plays an animation strip kind of thing
+void PlayAnim(int x, int y, int anim, int numframes, int dest, int _wait)
+{
+	int i;
+	for(i=0;i<numframes;i++)
+	{
+		DrawScreen();
+		TBlitFrame(x, y, anim, i, dest);
+		Wait(_wait);
+	}
+}
+
+//tints the screen
+void TintOn(int color, int luc)
+{
+	nTint = 1;
+	nTintColor = color;
+	nTintLuc = luc;
+}
+
+void TintOff()
+{
+	nTint = 0;
+}
+
+/***********************************************
+*Draws the window that appears on the top.     *
+*Where all the notifications go and stuff      *
+************************************************/
+void DrawTopWindow()
+{
+	if(strcmp(sBattleText, "") != 0)
+	{
+		Blit(50, 20, nTopWindowImg, nBackBuffer);
+	
+		PrintString(70, 30, nBackBuffer, nFont, sBattleText);
+		
+		sBattleText = "";
+	}
+}
+
+void DrawPlayerWindow()
+{
+	int negone = 0;
+	negone = negone - 1;
+	int x;
+	
+	Blit(0, 500, nPlayerWindowImg, nBackBuffer);
+	
+	//name, hp, mp
+	for(x=0;x<3;x++)
+	{
+		if(nPlayers[x] >= 0)
+		{
+			PrintString((x*250)+60, 505, nBackBuffer, nFont, InBattleChars[x].sName);
+			PrintString((x*250)+60, 530, nBackBuffer, nFont, "HP: " + str(InBattleChars[x].nHp) + "/" + str(InBattleChars[x].nMaxHp));
+			PrintString((x*250)+60, 555, nBackBuffer, nFont, "MP: " + str(InBattleChars[x].nMp) + "/" + str(InBattleChars[x].nMaxMp));
+
+			Rect((x*250)+60, 580, (x*250)+160, 585, RGB(255, 255, 255), nBackBuffer);
+			//if there charging a command, draw the bar backwards to show the command charging
+			if(InBattleChars[x].nCurCommand >= 0)
+			{
+				if(InBattleChars[x].nCommandWait > BatCommands[InBattleChars[x].nCurCommand].nWaitTime)
+				{
+					RectFill((x*250)+61, 581, (x*250)+159, 584, RGB(0, 0, 200), nBackBuffer);
+				}
+				else
+				{
+					RectFill((x*250)+61, 581, ((x*250)+59)+((InBattleChars[x].nCommandWait*100)/BatCommands[InBattleChars[x].nCurCommand].nWaitTime), 584, RGB(0, 0, 200), nBackBuffer);
+				}
+			}
+			else
+			{
+				//else show the normal wait bar
+				if(InBattleChars[x].nWait > BATTLE_WAIT_TIME)
+				{
+					//don't fill the bar bigger the the border
+					RectFill((x*250)+61, 581, (x*250)+159, 584, RGB(0, 255, 0), nBackBuffer);
+				}
+				else
+				{
+					RectFill((x*250)+61, 581, ((x*250)+59)+(InBattleChars[x].nWait/10), 584, RGB(0, 255, 0), nBackBuffer);
+				}
+			}
+		}
+		
+		if(nTurn == x && nDrawPlayerWindow)
+		{
+			//commands
+			Blit((x*250)+40, 425, nPlayerCommandWindowImg, nBackBuffer);
+
+			if(InBattleChars[x].nCommands[0] > negone)
+				PrintString((x*250)+65, 440, nBackBuffer, nFont, BatCommands[InBattleChars[x].nCommands[0]].sName);
+			if(InBattleChars[x].nCommands[1] > negone)
+				PrintString((x*250)+65, 455, nBackBuffer, nFont, BatCommands[InBattleChars[x].nCommands[1]].sName);
+			if(InBattleChars[x].nCommands[2] > negone)
+				PrintString((x*250)+65, 470, nBackBuffer, nFont, BatCommands[InBattleChars[x].nCommands[2]].sName);
+
+			//pointer
+			if(nPointerOn && !nTargetPointer)
+				TBlit((x*250)+45, 440+(15*nPointerPos), nPointer, nBackBuffer);
+		}
+
+		//status icons
+		if(HasStatus(x, 0))
+			TBlit((x*250)+10, 505, nVenomIcon, nBackBuffer);
+
+		if(HasStatus(x, 1))
+			TBlit((x*250)+25, 505, nWeakIcon, nBackBuffer);
+
+		if(HasStatus(x, 2))
+			TBlit((x*250)+10, 520, nMagicIcon, nBackBuffer);
+
+		if(HasStatus(x, 3))
+			TBlit((x*250)+25, 520, nPhysicalIcon, nBackBuffer);
+
+		if(HasStatus(x, 4))
+			TBlit((x*250)+10, 535, nInvisIcon, nBackBuffer);
+
+		if(HasStatus(x, 5))
+			TBlit((x*250)+25, 535, nHideIcon, nBackBuffer);
+	}
+}
+
+void DrawEnemies()
+{
+	int negone = 0;
+	negone = negone - 1;
+	
+
+	if(nMonsters[0] != negone && !InBattleChars[3].nDead)
+	{
+		SetLucent(nMonsterLuc[0]);
+		if(nMonsterActing == 3)
+			TBlit(MONSTER_1_X-(ImageWidth(InBattleChars[3].nImage)/2), MONSTER_1_Y+50-(ImageHeight(InBattleChars[3].nImage)/2), InBattleChars[3].nImage, nBackBuffer);
+		else
+			TBlit(MONSTER_1_X-(ImageWidth(InBattleChars[3].nImage)/2), MONSTER_1_Y-(ImageHeight(InBattleChars[3].nImage)/2), InBattleChars[3].nImage, nBackBuffer);
+		SetLucent(0);
+	}
+
+	if(nMonsters[1] != negone && !InBattleChars[4].nDead)
+	{
+		SetLucent(nMonsterLuc[1]);
+		if(nMonsterActing == 4)
+			TBlit(MONSTER_2_X-(ImageWidth(InBattleChars[4].nImage)/2), MONSTER_2_Y+50-(ImageHeight(InBattleChars[4].nImage)/2), InBattleChars[4].nImage, nBackBuffer);
+		else
+			TBlit(MONSTER_2_X-(ImageWidth(InBattleChars[4].nImage)/2), MONSTER_2_Y-(ImageHeight(InBattleChars[4].nImage)/2), InBattleChars[4].nImage, nBackBuffer);
+		SetLucent(0);
+	}
+
+	if(nMonsters[2] != negone && !InBattleChars[5].nDead)
+	{
+		SetLucent(nMonsterLuc[2]);
+		if(nMonsterActing == 5)
+			TBlit(MONSTER_3_X-(ImageWidth(InBattleChars[5].nImage)/2), MONSTER_3_Y+50-(ImageHeight(InBattleChars[5].nImage)/2), InBattleChars[5].nImage, nBackBuffer);
+		else
+			TBlit(MONSTER_3_X-(ImageWidth(InBattleChars[5].nImage)/2), MONSTER_3_Y-(ImageHeight(InBattleChars[5].nImage)/2), InBattleChars[5].nImage, nBackBuffer);
+		SetLucent(0);
+	}
+
+}
+
+/***********************************************
+*Draws the targeting pointer                   *
+*                                              *
+************************************************/
+void DrawTargetPointer()
+{
+	//draw the target pointer
+	if(nTargetPointer == 1)
+	{
+		if(nTargetPointerPos < 3)
+		{
+			TBlit((nTargetPointerPos*250)+35, 505, nPointer, nBackBuffer);
+		}
+		
+		if(nTargetPointerPos == 3)
+		{
+			TBlit(MONSTER_1_X-ImageWidth(InBattleChars[3].nImage), MONSTER_1_Y-10, nPointer, nBackBuffer);
+		}
+
+		if(nTargetPointerPos == 4)
+		{
+			TBlit(MONSTER_2_X-ImageWidth(InBattleChars[4].nImage), MONSTER_2_Y-10, nPointer, nBackBuffer);
+		}
+			
+		if(nTargetPointerPos == 5)
+		{
+			TBlit(MONSTER_3_X-ImageWidth(InBattleChars[5].nImage), MONSTER_3_Y-10, nPointer, nBackBuffer);
+		}
+	}
+}	
+
+/***********************************************
+*Draws the entire screen                       *
+*                                              *
+************************************************/
+void DrawScreen()
+{
+	Blit(0, 0, nBackground, nBackBuffer); //draw the background
+	DrawTopWindow();
+	DrawPlayerWindow();
+	DrawEnemies();
+	DrawTargetPointer();
+	
+	//blast the back buffer
+	Blit(0, 0, nBackBuffer, screen);
+	//clear the back buffer for the next frame
+	RectFill(0, 0, 800, 600, RGB(0, 0, 0), nBackBuffer);
+
+	if(nTint)
+	{
+		SetLucent(nTintLuc);
+		RectFill(0,0,ImageWidth(screen),ImageHeight(screen),nTintColor,screen);
+		SetLucent(0);
+	}
+}
+
+/***********************************************
+*Puts text in the box thingy and makes         *
+*the whole thing wait                          *
+************************************************/
+void SetText(string text, int manual)
+{
+	if(strcmp(text, "") != 0)
+	{
+		sBattleText = text;
+	
+		nWait = nBattleSpeed*20;
+	
+		DrawScreen();
+		
+		if(nManualWait == 0)
+		{
+			//nManualWait == 0 - Auto scroll
+			DoWait();
+		}
+		else if(nManualWait == 1)
+		{
+			//nManualWait == 1 - Mixed scroll - auto scroll for most inbattle stuff
+			//spell anouncements and stuff, manual for everything else
+			if(manual)
+			{
+				ManualWait();
+			}
+			else
+			{
+				DoWait();
+			}
+		}
+		else if(nManualWait == 2)
+		{
+			//nManualWait == 2 - Manual scroll
+			ManualWait();
+		}
+	}
+}
+
+
+/***********************************************
+*Loads all the general stuff needed for the    *
+*battle system                                 *
+************************************************/
+void InitBattle()
+{
+	int negone = 0;
+	negone--;
+	int i;
+	
+	nMonsterActing = 0;
+	nMonsterActing--;
+	
+	nMonsterLuc[0] = 0;
+	nMonsterLuc[1] = 0;
+	nMonsterLuc[2] = 0;
+	
+	//¡behold la energía de mi código feo!
+	//because I can't say structA = structB
+	if(nPlayers[0] >= 0)
+	{
+		InBattleChars[0].sName = BatChars[nPlayers[0]].sName;
+		InBattleChars[0].nHp = BatChars[nPlayers[0]].nHp;
+		InBattleChars[0].nMaxHp = BatChars[nPlayers[0]].nMaxHp;
+		InBattleChars[0].nMp = BatChars[nPlayers[0]].nMp;
+		InBattleChars[0].nMaxMp = BatChars[nPlayers[0]].nMaxMp;
+
+		InitChars(nPlayers[0], 0);
+
+		InBattleChars[0].nSpeed = BatChars[nPlayers[0]].nSpeed;
+		InBattleChars[0].nWait = 0;
+		InBattleChars[0].nDead = BatChars[nPlayers[0]].nDead;
+
+		InBattleChars[0].nOriginalMagicPow = InBattleChars[0].nMagicPow;
+		InBattleChars[0].nOriginalMagicDef = InBattleChars[0].nMagicDef;
+		InBattleChars[0].nOriginalMagicEvade = InBattleChars[0].nMagicEvade;
+		InBattleChars[0].nOriginalMagicHit = InBattleChars[0].nMagicHit;
+		InBattleChars[0].nOriginalAttackPow = InBattleChars[0].nAttackPow;
+		InBattleChars[0].nOriginalDefense = InBattleChars[0].nDefense;
+		InBattleChars[0].nOriginalEvade = InBattleChars[0].nEvade;
+		InBattleChars[0].nOriginalHit = InBattleChars[0].nHit;	
+
+		InBattleChars[0].sImage = BatChars[nPlayers[0]].sImage;
+		InBattleChars[0].nExp = BatChars[nPlayers[0]].nExp;
+		InBattleChars[0].nLvl = BatChars[nPlayers[0]].nLvl;
+		RemoveStatus(0, negone);
+		InBattleChars[0].nCommands[0] = BatChars[nPlayers[0]].nCommands[0];
+		InBattleChars[0].nCommands[1] = BatChars[nPlayers[0]].nCommands[1];
+		InBattleChars[0].nCommands[2] = BatChars[nPlayers[0]].nCommands[2];
+		
+		InBattleChars[0].nCurCommand = 0-1;
+		InBattleChars[0].nCommandWait = 0;
+		
+		i=0;
+		while(i < 10)
+		{
+			InBattleChars[0].nSpells[i] = BatChars[nPlayers[0]].nSpells[i];
+			InBattleChars[0].nSpellLevel[i] = BatChars[nPlayers[0]].nSpellLevel[i];
+			InBattleChars[0].nSpellExp[i] = BatChars[nPlayers[0]].nSpellExp[i];
+			i++;
+		}
+	}
+	else
+	{
+		//so enemies don't target them
+		InBattleChars[0].nDead = 1;
+	}
+	
+	if(nPlayers[1] >= 0)
+	{
+		InBattleChars[1].sName = BatChars[nPlayers[1]].sName;
+		InBattleChars[1].nHp = BatChars[nPlayers[1]].nHp;
+		InBattleChars[1].nMaxHp = BatChars[nPlayers[1]].nMaxHp;
+		InBattleChars[1].nMp = BatChars[nPlayers[1]].nMp;
+		InBattleChars[1].nMaxMp = BatChars[nPlayers[1]].nMaxMp;
+	
+		InitChars(nPlayers[1], 1);
+		
+		InBattleChars[1].nSpeed = BatChars[nPlayers[1]].nSpeed;
+		InBattleChars[1].nWait = 0;
+		InBattleChars[1].nDead = BatChars[nPlayers[1]].nDead;
+
+		InBattleChars[1].nOriginalMagicPow = InBattleChars[1].nMagicPow;
+		InBattleChars[1].nOriginalMagicDef = InBattleChars[1].nMagicDef;
+		InBattleChars[1].nOriginalMagicEvade = InBattleChars[1].nMagicEvade;
+		InBattleChars[1].nOriginalMagicHit = InBattleChars[1].nMagicHit;
+		InBattleChars[1].nOriginalAttackPow = InBattleChars[1].nAttackPow;
+		InBattleChars[1].nOriginalDefense = InBattleChars[1].nDefense;
+		InBattleChars[1].nOriginalEvade = InBattleChars[1].nEvade;
+		InBattleChars[1].nOriginalHit = InBattleChars[1].nHit;	
+
+		InBattleChars[1].sImage = BatChars[nPlayers[1]].sImage;
+		InBattleChars[1].nExp = BatChars[nPlayers[1]].nExp;
+		InBattleChars[1].nLvl = BatChars[nPlayers[1]].nLvl;
+		RemoveStatus(1, negone);
+		InBattleChars[1].nCommands[0] = BatChars[nPlayers[1]].nCommands[0];
+		InBattleChars[1].nCommands[1] = BatChars[nPlayers[1]].nCommands[1];
+		InBattleChars[1].nCommands[2] = BatChars[nPlayers[1]].nCommands[2];
+
+		InBattleChars[1].nCurCommand = 0-1;
+		InBattleChars[1].nCommandWait = 0;
+
+		i=0;
+		while(i < 10)
+		{
+			InBattleChars[1].nSpells[i] = BatChars[nPlayers[1]].nSpells[i];
+			InBattleChars[1].nSpellLevel[i] = BatChars[nPlayers[1]].nSpellLevel[i];		
+			InBattleChars[1].nSpellExp[i] = BatChars[nPlayers[1]].nSpellExp[i];
+			i++;
+		}
+	}
+	else
+	{
+		//so enemies don't target them
+		InBattleChars[1].nDead = 1;
+	}
+
+	if(nPlayers[2] >= 0)
+
+	{
+		InBattleChars[2].sName = BatChars[nPlayers[2]].sName;
+		InBattleChars[2].nHp = BatChars[nPlayers[2]].nHp;
+		InBattleChars[2].nMaxHp = BatChars[nPlayers[2]].nMaxHp;
+		InBattleChars[2].nMp = BatChars[nPlayers[2]].nMp;
+		InBattleChars[2].nMaxMp = BatChars[nPlayers[2]].nMaxMp;
+	
+		InitChars(nPlayers[2], 2);
+		
+		InBattleChars[2].nSpeed = BatChars[nPlayers[2]].nSpeed;
+		InBattleChars[2].nWait = 0;
+		InBattleChars[2].nDead = BatChars[nPlayers[2]].nDead;
+	
+		InBattleChars[2].nOriginalMagicPow = InBattleChars[2].nMagicPow;
+		InBattleChars[2].nOriginalMagicDef = InBattleChars[2].nMagicDef;
+		InBattleChars[2].nOriginalMagicEvade = InBattleChars[2].nMagicEvade;
+		InBattleChars[2].nOriginalMagicHit = InBattleChars[2].nMagicHit;
+		InBattleChars[2].nOriginalAttackPow = InBattleChars[2].nAttackPow;
+		InBattleChars[2].nOriginalDefense = InBattleChars[2].nDefense;
+		InBattleChars[2].nOriginalEvade = InBattleChars[2].nEvade;
+		InBattleChars[2].nOriginalHit = InBattleChars[2].nHit;	
+
+		InBattleChars[2].sImage = BatChars[nPlayers[2]].sImage;
+		InBattleChars[2].nExp = BatChars[nPlayers[2]].nExp;
+		InBattleChars[2].nLvl = BatChars[nPlayers[2]].nLvl;
+		RemoveStatus(2, negone);
+		InBattleChars[2].nCommands[0] = BatChars[nPlayers[2]].nCommands[0];
+		InBattleChars[2].nCommands[1] = BatChars[nPlayers[2]].nCommands[1];
+		InBattleChars[2].nCommands[2] = BatChars[nPlayers[2]].nCommands[2];
+
+		InBattleChars[2].nCurCommand = 0-1;
+		InBattleChars[2].nCommandWait = 0;
+
+		i=0;
+		while(i < 10)
+		{
+			InBattleChars[2].nSpells[i] = BatChars[nPlayers[2]].nSpells[i];
+			InBattleChars[2].nSpellLevel[i] = BatChars[nPlayers[2]].nSpellLevel[i];		
+			InBattleChars[2].nSpellExp[i] = BatChars[nPlayers[2]].nSpellExp[i];
+			i++;
+		}
+	}
+	else
+	{
+		//so enemies don't target them
+		InBattleChars[2].nDead = 1;
+	}
+		
+
+	if(nMonsters[0] >= 0)
+	{
+		InBattleChars[3].sName = BatChars[nMonsters[0]].sName;
+		InBattleChars[3].nHp = BatChars[nMonsters[0]].nHp;
+		InBattleChars[3].nMaxHp = BatChars[nMonsters[0]].nMaxHp;
+		InBattleChars[3].nMp = BatChars[nMonsters[0]].nMp;
+		InBattleChars[3].nMaxMp = BatChars[nMonsters[0]].nMaxMp;
+	
+		InBattleChars[3].nMagicPow = BatChars[nMonsters[0]].nMagicPow;
+		InBattleChars[3].nMagicDef = BatChars[nMonsters[0]].nMagicDef;
+		InBattleChars[3].nMagicEvade = BatChars[nMonsters[0]].nMagicEvade;
+		InBattleChars[3].nMagicHit = BatChars[nMonsters[0]].nMagicHit;
+		InBattleChars[3].nAttackPow = BatChars[nMonsters[0]].nAttackPow;
+		InBattleChars[3].nDefense = BatChars[nMonsters[0]].nDefense;
+		InBattleChars[3].nEvade = BatChars[nMonsters[0]].nEvade;
+		InBattleChars[3].nHit = BatChars[nMonsters[0]].nHit;
+		InBattleChars[3].nSpeed = BatChars[nMonsters[0]].nSpeed;
+		InBattleChars[3].nWait = 0;
+		InBattleChars[3].nDead = 0;
+	
+		InBattleChars[3].nOriginalMagicPow = InBattleChars[3].nMagicPow;
+		InBattleChars[3].nOriginalMagicDef = InBattleChars[3].nMagicDef;
+		InBattleChars[3].nOriginalMagicEvade = InBattleChars[3].nMagicEvade;
+		InBattleChars[3].nOriginalMagicHit = InBattleChars[3].nMagicHit;
+		InBattleChars[3].nOriginalAttackPow = InBattleChars[3].nAttackPow;
+		InBattleChars[3].nOriginalDefense = InBattleChars[3].nDefense;
+		InBattleChars[3].nOriginalEvade = InBattleChars[3].nEvade;
+		InBattleChars[3].nOriginalHit = InBattleChars[3].nHit;	
+
+		InBattleChars[3].sImage = BatChars[nMonsters[0]].sImage;
+		InBattleChars[3].nExp = BatChars[nMonsters[0]].nExp;
+		InBattleChars[3].nBling = BatChars[nMonsters[0]].nBling;
+		InBattleChars[3].nLvl = BatChars[nMonsters[0]].nLvl;
+		RemoveStatus(3, negone);
+		InBattleChars[3].nCommands[0] = BatChars[nMonsters[0]].nCommands[0];
+		InBattleChars[3].nCommands[1] = BatChars[nMonsters[0]].nCommands[1];
+		InBattleChars[3].nCommands[2] = BatChars[nMonsters[0]].nCommands[2];
+	
+		InBattleChars[3].nSpellLevel[0] = BatChars[nMonsters[0]].nSpellLevel[0];
+		InBattleChars[3].nSpellLevel[1] = BatChars[nMonsters[0]].nSpellLevel[1];
+		InBattleChars[3].nSpellLevel[2] = BatChars[nMonsters[0]].nSpellLevel[2];
+	
+		InBattleChars[3].nImage = LoadImage(InBattleChars[3].sImage);
+		InBattleChars[3].nCanBeBanished = BatChars[nMonsters[0]].nCanBeBanished;
+
+		InBattleChars[3].nCurCommand = 0-1;
+		InBattleChars[3].nCommandWait = 0;
+	}
+	else
+	{
+		InBattleChars[3].nDead = 1;
+	}
+
+
+	if(nMonsters[1] >= 0)
+	{
+		InBattleChars[4].sName = BatChars[nMonsters[1]].sName;
+		InBattleChars[4].nHp = BatChars[nMonsters[1]].nHp;
+		InBattleChars[4].nMaxHp = BatChars[nMonsters[1]].nMaxHp;
+		InBattleChars[4].nMp = BatChars[nMonsters[1]].nMp;
+		InBattleChars[4].nMaxMp = BatChars[nMonsters[1]].nMaxMp;
+
+		InBattleChars[4].nMagicPow = BatChars[nMonsters[1]].nMagicPow;
+		InBattleChars[4].nMagicDef = BatChars[nMonsters[1]].nMagicDef;
+		InBattleChars[4].nMagicEvade = BatChars[nMonsters[1]].nMagicEvade;
+		InBattleChars[4].nMagicHit = BatChars[nMonsters[1]].nMagicHit;
+		InBattleChars[4].nAttackPow = BatChars[nMonsters[1]].nAttackPow;
+		InBattleChars[4].nDefense = BatChars[nMonsters[1]].nDefense;
+		InBattleChars[4].nEvade = BatChars[nMonsters[1]].nEvade;
+		InBattleChars[4].nHit = BatChars[nMonsters[1]].nHit;
+		InBattleChars[4].nSpeed = BatChars[nMonsters[1]].nSpeed;
+		InBattleChars[4].nWait = 0;
+		InBattleChars[4].nDead = 0;
+
+		InBattleChars[4].nOriginalMagicPow = InBattleChars[4].nMagicPow;
+		InBattleChars[4].nOriginalMagicDef = InBattleChars[4].nMagicDef;
+		InBattleChars[4].nOriginalMagicEvade = InBattleChars[4].nMagicEvade;
+		InBattleChars[4].nOriginalMagicHit = InBattleChars[4].nMagicHit;
+		InBattleChars[4].nOriginalAttackPow = InBattleChars[4].nAttackPow;
+		InBattleChars[4].nOriginalDefense = InBattleChars[4].nDefense;
+		InBattleChars[4].nOriginalEvade = InBattleChars[4].nEvade;
+		InBattleChars[4].nOriginalHit = InBattleChars[4].nHit;	
+
+		InBattleChars[4].sImage = BatChars[nMonsters[1]].sImage;
+		InBattleChars[4].nExp = BatChars[nMonsters[1]].nExp;
+		InBattleChars[4].nBling = BatChars[nMonsters[1]].nBling;	
+		InBattleChars[4].nLvl = BatChars[nMonsters[1]].nLvl;
+		RemoveStatus(4, negone);
+		InBattleChars[4].nCommands[0] = BatChars[nMonsters[1]].nCommands[0];
+		InBattleChars[4].nCommands[1] = BatChars[nMonsters[1]].nCommands[1];
+		InBattleChars[4].nCommands[2] = BatChars[nMonsters[1]].nCommands[2];
+	
+		InBattleChars[4].nSpellLevel[0] = BatChars[nMonsters[1]].nSpellLevel[0];
+		InBattleChars[4].nSpellLevel[1] = BatChars[nMonsters[1]].nSpellLevel[1];
+		InBattleChars[4].nSpellLevel[2] = BatChars[nMonsters[1]].nSpellLevel[2];
+	
+		InBattleChars[4].nImage = LoadImage(InBattleChars[4].sImage);
+		InBattleChars[4].nCanBeBanished = BatChars[nMonsters[1]].nCanBeBanished;
+
+		InBattleChars[4].nCurCommand = 0-1;
+		InBattleChars[4].nCommandWait = 0;
+	}
+	else
+	{
+		InBattleChars[4].nDead = 1;
+	}
+
+	if(nMonsters[2] >= 0)
+	{
+		InBattleChars[5].sName = BatChars[nMonsters[2]].sName;
+		InBattleChars[5].nHp = BatChars[nMonsters[2]].nHp;
+		InBattleChars[5].nMaxHp = BatChars[nMonsters[2]].nMaxHp;
+		InBattleChars[5].nMp = BatChars[nMonsters[2]].nMp;
+		InBattleChars[5].nMaxMp = BatChars[nMonsters[2]].nMaxMp;
+
+		InBattleChars[5].nMagicPow = BatChars[nMonsters[2]].nMagicPow;
+		InBattleChars[5].nMagicDef = BatChars[nMonsters[2]].nMagicDef;
+		InBattleChars[5].nMagicEvade = BatChars[nMonsters[2]].nMagicEvade;
+		InBattleChars[5].nMagicHit = BatChars[nMonsters[2]].nMagicHit;
+		InBattleChars[5].nAttackPow = BatChars[nMonsters[2]].nAttackPow;
+		InBattleChars[5].nDefense = BatChars[nMonsters[2]].nDefense;
+		InBattleChars[5].nEvade = BatChars[nMonsters[2]].nEvade;
+		InBattleChars[5].nHit = BatChars[nMonsters[2]].nHit;
+		InBattleChars[5].nSpeed = BatChars[nMonsters[2]].nSpeed;
+		InBattleChars[5].nWait = 0;
+		InBattleChars[5].nDead = 0;
+
+		InBattleChars[5].nOriginalMagicPow = InBattleChars[5].nMagicPow;
+		InBattleChars[5].nOriginalMagicDef = InBattleChars[5].nMagicDef;
+		InBattleChars[5].nOriginalMagicEvade = InBattleChars[5].nMagicEvade;
+		InBattleChars[5].nOriginalMagicHit = InBattleChars[5].nMagicHit;
+		InBattleChars[5].nOriginalAttackPow = InBattleChars[5].nAttackPow;
+		InBattleChars[5].nOriginalDefense = InBattleChars[5].nDefense;
+		InBattleChars[5].nOriginalEvade = InBattleChars[5].nEvade;
+		InBattleChars[5].nOriginalHit = InBattleChars[5].nHit;	
+
+		InBattleChars[5].sImage = BatChars[nMonsters[2]].sImage;
+		InBattleChars[5].nExp = BatChars[nMonsters[2]].nExp;
+		InBattleChars[5].nBling = BatChars[nMonsters[2]].nBling;
+		InBattleChars[5].nLvl = BatChars[nMonsters[2]].nLvl;
+		RemoveStatus(5, negone);
+		InBattleChars[5].nCommands[0] = BatChars[nMonsters[2]].nCommands[0];
+		InBattleChars[5].nCommands[1] = BatChars[nMonsters[2]].nCommands[1];
+		InBattleChars[5].nCommands[2] = BatChars[nMonsters[2]].nCommands[2];
+	
+		InBattleChars[5].nSpellLevel[0] = BatChars[nMonsters[2]].nSpellLevel[0];
+		InBattleChars[5].nSpellLevel[1] = BatChars[nMonsters[2]].nSpellLevel[1];
+		InBattleChars[5].nSpellLevel[2] = BatChars[nMonsters[2]].nSpellLevel[2];
+	
+		InBattleChars[5].nImage = LoadImage(InBattleChars[5].sImage);
+		InBattleChars[5].nCanBeBanished = BatChars[nMonsters[2]].nCanBeBanished;
+
+		InBattleChars[5].nCurCommand = 0-1;
+		InBattleChars[5].nCommandWait = 0;
+	}
+	else
+	{
+		InBattleChars[5].nDead = 1;
+	}
+
+	//init the bouncy numbers
+	nBouncy[0] = 3;
+	nBouncy[1] = 6;
+	nBouncy[2] = 9;
+	nBouncy[3] = 12;
+	nBouncy[4] = 14;
+	nBouncy[5] = 14;
+	nBouncy[6] = 15;
+	nBouncy[7] = 15;
+	nBouncy[8] = 15;
+	nBouncy[9] = 14;
+	nBouncy[10] = 14;
+	nBouncy[11] = 12;
+	nBouncy[12] = 9;
+	nBouncy[13] = 6;
+	nBouncy[14] = 3;
+	nBouncy[15] = 0;
+	
+	//nTurn = -1 because verge can't under stand -1
+	nTurn = 0;
+	nTurn = nTurn - 1;
+	
+	nRunning = 0;
+	
+	nBackBuffer = NewImage(800, 600);
+	nVenomIcon = LoadImage("venomicon.png");
+	nWeakIcon = LoadImage("weakicon.png");
+	nMagicIcon = LoadImage("magicicon.png");
+	nPhysicalIcon = LoadImage("physicalicon.png");
+	nInvisIcon = LoadImage("invisicon.png");
+	nHideIcon = LoadImage("hideicon.png");
+	
+	nAttackAnim = LoadAnimation("attack.png", 100, 100);
+	nFireAnim = LoadAnimation("fire.png", 32, 32);
+	nHealAnim = LoadAnimation("heal.png", 32, 32);
+	nVenomAnim = LoadAnimation("venom.png", 32, 32);
+	
+	nFireSound = LoadSound("fire.wav");
+	nAttackSound = LoadSound("attack.wav");
+	nMissSound = LoadSound("miss.wav");
+	nSpellMissSound = LoadSound("spellmiss.wav");
+	nDeathSound = LoadSound("die.wav");
+	nVenomSound = LoadSound("venom.wav");
+	nBanishSound = LoadSound("banish.wav");
+	nWeakSound = LoadSound("weakarmor.wav");
+	nReadySound = LoadSound("ready.wav");
+
+	nTopWindowImg = GenerateWindow(666, 45);
+	nMagicWindowImg = GenerateWindow(625, 175);
+	nPlayerWindowImg = GenerateWindow(800, 100);
+	nPlayerCommandWindowImg = GenerateWindow(150, 74);
+}
+
+/*************************************************************
+*Starts a battle                                             *
+*e1-3 are the enemy indexes (-1 for none), p1-3 are the PCs  *
+**************************************************************/
+int StartBattle(int e1, int e2, int e3, int p1, int p2, int p3, string bkg, string mus)
+{
+	int negone = 0;
+	negone = negone-1;
+	int i;
+	
+	if(nBattles==1)
+		return 0;
+
+	nMenuCanOpen=0;
+	
+	nDrawPlayerWindow = 1;
+	
+
+	SetSongPaused(nMapSong, 1);
+	
+	nBattleSong = LoadSong(mus);
+	PlaySong(nBattleSong);
+	
+	nBackground = LoadImage(bkg);
+	
+	BattleTransition(150);
+
+	//BoxOut(40);
+
+	
+	RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), RGB(0,0,0), screen);
+	ShowPage();
+	
+	//Gyasi (REALLY) can't code
+	nPlayers[0] = p1;
+	nPlayers[1] = p2;
+	nPlayers[2] = p3;
+	
+	nMonsters[0] = e1;
+	nMonsters[1] = e2;
+	nMonsters[2] = e3;
+
+	InitStatus();
+	InitBattle();
+	
+	while(nRunning == 0)
+	{
+		DrawScreen();
+		DoWait();
+		DoLogic();
+	}
+	
+	if(nWait > 0)
+	{
+		DrawScreen();
+		DoWait();
+	}
+	
+	//set the out of battle stuff once they leave battle
+	if(nPlayers[0] >= 0)
+	{
+		BatChars[nPlayers[0]].nHp = InBattleChars[0].nHp;
+		BatChars[nPlayers[0]].nMp = InBattleChars[0].nMp;
+		BatChars[nPlayers[0]].nDead = InBattleChars[0].nDead;
+	
+
+		for(i=0;i<10;i++)
+		{
+			BatChars[nPlayers[0]].nSpellLevel[i] = InBattleChars[0].nSpellLevel[i];
+			BatChars[nPlayers[0]].nSpellExp[i] = InBattleChars[0].nSpellExp[i];
+		}
+		
+		//check for level up
+		CheckLevelUp(nPlayers[0]);
+	}
+
+	if(nPlayers[1] >= 0)
+	{
+		BatChars[nPlayers[1]].nHp = InBattleChars[1].nHp;
+		BatChars[nPlayers[1]].nMp = InBattleChars[1].nMp;
+		BatChars[nPlayers[1]].nDead = InBattleChars[1].nDead;
+	
+		for(i=0;i<10;i++)
+		{
+			BatChars[nPlayers[1]].nSpellLevel[i] = InBattleChars[1].nSpellLevel[i];
+			BatChars[nPlayers[1]].nSpellExp[i] = InBattleChars[1].nSpellExp[i];
+		}
+		
+		//check for level up
+		CheckLevelUp(nPlayers[1]);
+	}
+
+	if(nPlayers[2] >= 0)
+	{
+		BatChars[nPlayers[2]].nHp = InBattleChars[2].nHp;
+		BatChars[nPlayers[2]].nMp = InBattleChars[2].nMp;
+		BatChars[nPlayers[2]].nDead = InBattleChars[2].nDead;
+	
+		for(i=0;i<10;i++)
+		{
+			BatChars[nPlayers[2]].nSpellLevel[i] = InBattleChars[2].nSpellLevel[i];
+			BatChars[nPlayers[2]].nSpellExp[i] = InBattleChars[2].nSpellExp[i];
+		}
+
+		//check for level up
+		CheckLevelUp(nPlayers[2]);
+	}
+	
+	ShutdownBattle();
+	
+	StopSong(nBattleSong);
+	FreeSong(nBattleSong);
+	SetSongPaused(nMapSong, 0);
+	
+	nMenuCanOpen=1;
+	
+	Blit(0, 0, screen, crossfade_img);
+	TransWipe(50);
+	
+	return nRunning-1;
+}
+
+void CheckLevelUp(int i)
+{
+	int lvlsgained = 0;
+	
+	while(BatChars[i].nExp >= BatChars[i].nTNL)
+	{
+		BatChars[i].nMaxHp += Random(BatChars[i].nCon/4, BatChars[i].nCon/2);
+		if(BatChars[i].nMaxMp != 0)
+			BatChars[i].nMaxMp += Random(BatChars[i].nInt/4, BatChars[i].nInt/2);
+
+		//bump the stats too
+		BatChars[i].nStr += Random(0, 1);
+		BatChars[i].nDex += Random(0, 1);
+		BatChars[i].nInt += Random(0, 1);
+		BatChars[i].nWis += Random(0, 1);
+		BatChars[i].nCon += Random(0, 1);
+
+		//and mabey...just mabey.....INCREASE THERE LEVEL......sometimes I wounder....
+		BatChars[i].nLvl++;
+
+		BatChars[i].nExpDumped = 0; //set the exp dumped back to 0 so they can add more to their skills
+
+		BatChars[i].nExp -= BatChars[i].nTNL;
+		
+		lvlsgained++;
+	}
+	
+	if(lvlsgained == 1)
+
+	{
+		SetText(BatChars[i].sName + " gained a level!", 1);
+	}
+	else if(lvlsgained > 1)
+	{
+		SetText(BatChars[i].sName + " gained " + str(lvlsgained) + " levels!", 1);
+	}
+
+	DrawScreen();
+	DoWait();
+}
+
+/***********************************************
+*You mean you have to free things?             *
+*                                              *
+************************************************/
+void ShutdownBattle()
+{
+	if(nMonsters[0] >= 0)
+		FreeImage(InBattleChars[3].nImage);
+	if(nMonsters[1] >= 0)
+		FreeImage(InBattleChars[4].nImage);
+	if(nMonsters[2] >= 0)
+		FreeImage(InBattleChars[5].nImage);
+	
+	FreeImage(nBackBuffer);
+	FreeImage(nBackground);
+	FreeImage(nVenomIcon);
+	FreeImage(nWeakIcon);
+	FreeImage(nMagicIcon);
+	FreeImage(nPhysicalIcon);
+	FreeImage(nInvisIcon);
+	FreeImage(nHideIcon);
+	
+	FreeImage(nTopWindowImg);
+	FreeImage(nMagicWindowImg);
+	FreeImage(nPlayerWindowImg);
+	FreeImage(nPlayerCommandWindowImg);
+		
+	FreeSound(nFireSound);
+	FreeSound(nAttackSound);
+	FreeSound(nMissSound);
+	FreeSound(nSpellMissSound);
+	FreeSound(nDeathSound);
+	FreeSound(nVenomSound);
+	FreeSound(nBanishSound);
+	FreeSound(nWeakSound);
+	FreeSound(nReadySound);
+	
+	FreeAnimation(nAttackAnim);
+	FreeAnimation(nFireAnim);
+	FreeAnimation(nHealAnim);
+	FreeAnimation(nVenomAnim);
+	
+	StopMusic();
+}
+
+/***********************************************
+*Check if any of the chars have been killed    *
+*if so set there hp to 0                       *
+************************************************/
+void CheckDeath()
+{
+	int i=0;
+	int x;
+
+	for(i=0;i<6;i++)
+	{
+		if(InBattleChars[i].nHp <= 0)
+		{
+			if(!InBattleChars[i].nDead)
+			{
+				if(i > 2)
+				{
+					//monster is dying
+					PlaySound(nDeathSound, 100);
+					for(x=0;x<=100;x+=15)
+					{
+						nMonsterLuc[i-3] = x;
+						DrawScreen();
+						Wait(nBattleSpeed);
+					}
+					
+				}
+				InBattleChars[i].nDead = 1;
+
+				//set the chrs wait to 0
+				InBattleChars[i].nWait = 0;
+
+				//remove any commands they might be charging
+				InBattleChars[i].nCurCommand = 0-1;
+				InBattleChars[i].nCommandIndex = 0-1;
+				InBattleChars[i].nCommandWait = 0-1;
+				InBattleChars[i].nCommandTarget = 0-1;
+			}
+			InBattleChars[i].nHp = 0;
+		}
+	}
+	CheckBattleOver();
+}
+
+void ChooseTarget()
+{
+	int done=0;
+
+	target = 0;
+	if(attacker == 0 || attacker == 1 || attacker == 2)
+	{
+		//now choose a target
+		nTargetPointer = 1;
+	
+		//point at the right team
+		if(BatCommands[nCommand].nAggressive == 1)
+			nTargetPointerPos = 3;
+		else
+			nTargetPointerPos = 0;
+	
+		while(InBattleChars[nTargetPointerPos].nDead)
+		{
+			if(nTargetPointerPos >= 5)
+				nTargetPointerPos = 0;
+			else
+				nTargetPointerPos++;						
+		}
+
+		while(!done)
+		{
+			if(up)
+			{
+				//move to monster team
+				if(nTargetPointerPos < 3)
+				{
+					nTargetPointerPos +=3;
+				
+					//if that location has a dead monster move to the left (and wrap)
+					while(InBattleChars[nTargetPointerPos].nDead)
+					{
+						nTargetPointerPos--;
+
+						if(nTargetPointerPos < 3)
+							nTargetPointerPos = 5;
+					}
+				}
+				
+				unpress(5);
+			}
+			else if(down)
+			{
+				//move to player team
+				if(nTargetPointerPos > 2)
+				{
+					nTargetPointerPos -=3;
+
+					//if that location has a nonexistant player move to the left (and wrap)
+					while(nPlayers[nTargetPointerPos] < 0)
+					{
+						nTargetPointerPos--;
+
+						if(nTargetPointerPos < 0)
+							nTargetPointerPos = 2;
+					}
+				}
+				unpress(6);
+			}
+			else if(left)
+			{
+				//move left on current team
+				if(nTargetPointerPos < 3)
+				{
+					//players
+					nTargetPointerPos--;
+					
+					if(nTargetPointerPos < 0)
+						nTargetPointerPos = 2;
+						
+					while(nPlayers[nTargetPointerPos] < 0)
+					{
+						nTargetPointerPos--;
+						
+						if(nTargetPointerPos < 0)
+							nTargetPointerPos = 2;
+					}
+				}
+				else
+				{
+					//monster
+					nTargetPointerPos--;
+					
+					if(nTargetPointerPos < 3)
+						nTargetPointerPos = 5;
+						
+					while(InBattleChars[nTargetPointerPos].nDead)
+					{
+						nTargetPointerPos--;
+						
+						if(nTargetPointerPos < 3)
+							nTargetPointerPos = 5;
+					}
+				}
+				unpress(7);
+			}
+			else if(right)
+			{
+				//move right on current team
+				if(nTargetPointerPos < 3)
+				{
+					//players
+					nTargetPointerPos++;
+					
+					if(nTargetPointerPos > 2)
+						nTargetPointerPos = 0;
+						
+					while(nPlayers[nTargetPointerPos] < 0)
+					{
+						nTargetPointerPos++;
+						
+						if(nTargetPointerPos > 2)
+							nTargetPointerPos = 0;
+					}
+				}
+				else
+				{
+					//monster
+					nTargetPointerPos++;
+					
+					if(nTargetPointerPos > 5)
+						nTargetPointerPos = 3;
+						
+					while(InBattleChars[nTargetPointerPos].nDead)
+					{
+						nTargetPointerPos++;
+						
+						if(nTargetPointerPos > 5)
+							nTargetPointerPos = 3;
+					}
+				}
+				unpress(8);
+			}
+			else if(b2)
+			{
+				target = 0;
+				target--;
+				done = 1;
+				Unpress(1);
+			}
+			else if(b1)
+			{
+				done = 1;
+				Unpress(2);
+			}
+	
+			DrawScreen();
+			ShowPage();
+		}
+		nTargetPointer = 0;
+		DrawScreen();
+		
+		if(target >= 0)
+			target = nTargetPointerPos;
+	}
+	else
+	{
+		//monsters choose random targets
+		target = Random(0, 2);
+		
+		//but not dead ones
+		while(InBattleChars[target].nDead)
+		{
+			target = Random(0, 2);
+		}
+	}
+}
+
+void ManualWait()
+{
+	int waitamt;
+	int i;
+	int screenimg = DuplicateImage(screen);
+	
+	Unpress(0);
+	i=0;
+	waitamt=30;
+	if(nWait > 0)
+	{
+		timer=0;
+		while(!b1)
+		{
+			ShowPage();
+			nWait=0;
+			
+			if(timer > waitamt)
+			{
+				Blit(0, 0, screenimg, screen);
+				waitamt=5;
+				TBlitFrame(682, 33, nDownPointerAnim, i, screen);
+				ShowPage();
+				timer=0;
+				i++;
+				
+				if(i > 9)
+					i=0;
+			}
+		}
+	}
+	Unpress(0);
+	
+	FreeImage(screenimg);
+}
+
+void DoWait()
+{
+	if(nWait > 0)
+	{
+		wait(nWait);
+		nWait = 0;
+	}
+}
+
+//checks if the battle is over, if so it takes the correct action
+void CheckBattleOver()
+{
+	int expgained1;
+	int expgained2;
+	int expgained3;
+
+	string str1;
+	string str2;
+	string str3;
+	
+	//if the battle is already over, don't check it again (and don't give the PC's more EXP!!!)
+
+	if(nRunning != 0)
+		return;
+
+	//battle over, so gain some xp, only if your alive
+	if(InBattleChars[3].nDead && InBattleChars[4].nDead && InBattleChars[5].nDead)
+	{
+		//fanfare song
+		StopSong(nBattleSong);
+		FreeSong(nBattleSong);
+		nBattleSong = LoadSong("fanfare.it");
+		PlaySong(nBattleSong);
+
+		//monster.nExp is the amt of exp gained if the monster and player are the same level
+		//so exp gained = monster.nExp*(monster.nLvl/player.nLvl)
+		expgained1 = ((InBattleChars[3].nExp*((InBattleChars[3].nLvl*100)/InBattleChars[0].nLvl))/100)+((InBattleChars[4].nExp*((InBattleChars[4].nLvl*100)/InBattleChars[0].nLvl))/100)+((InBattleChars[5].nExp*((InBattleChars[5].nLvl*100)/InBattleChars[0].nLvl))/100);
+		
+		expgained2 = ((InBattleChars[3].nExp*((InBattleChars[3].nLvl*100)/InBattleChars[1].nLvl))/100)+((InBattleChars[4].nExp*((InBattleChars[4].nLvl*100)/InBattleChars[1].nLvl))/100)+((InBattleChars[5].nExp*((InBattleChars[5].nLvl*100)/InBattleChars[1].nLvl))/100);
+
+		expgained3 = ((InBattleChars[3].nExp*((InBattleChars[3].nLvl*100)/InBattleChars[2].nLvl))/100)+((InBattleChars[4].nExp*((InBattleChars[4].nLvl*100)/InBattleChars[2].nLvl))/100)+((InBattleChars[5].nExp*((InBattleChars[5].nLvl*100)/InBattleChars[2].nLvl))/100);
+
+		nBling += InBattleChars[3].nBling+InBattleChars[4].nBling+InBattleChars[5].nBling;
+		
+		if(!InBattleChars[0].nDead)
+		{
+			BatChars[nPlayers[0]].nExp += expgained1;
+			str1 = BatChars[nPlayers[0]].sName + " gained " + str(expgained1) + " exp!";
+		}
+		else
+		{
+			str1 = "";
+		}
+		
+		if(!InBattleChars[1].nDead)
+		{
+			BatChars[nPlayers[1]].nExp += expgained2;
+			str2 = BatChars[nPlayers[1]].sName + " gained " + str(expgained2) + " exp!";
+		}
+		else
+		{
+			str2 = "";
+		}
+		
+		if(!InBattleChars[2].nDead)
+		{
+			BatChars[nPlayers[2]].nExp += expgained3;
+			str3 = BatChars[nPlayers[2]].sName + " gained " + str(expgained3) + " exp!";
+		}
+		else
+		{
+			str3 = "";
+		}
+			
+		SetText(str1, 1);
+		SetText(str2, 1);
+		SetText(str3, 1);
+		SetText("Got " + str(InBattleChars[3].nBling+InBattleChars[4].nBling+InBattleChars[5].nBling) + " Bling!", 1);
+		
+		nRunning = 1;
+	}
+	else if(InBattleChars[0].nDead && InBattleChars[1].nDead && InBattleChars[2].nDead)
+	{
+		SetText("All party members have been killed!", 1);
+		nRunning = 2;
+	}
+}
+
+void DoLogic()
+{
+	int again=1;
+	int command;
+	int negone = 0;
+	negone = negone - 1;
+	int i = 0;
+	int initready=0;
+	int big;
+	int j;
+	int bigfound;
+
+	CheckBattleOver();
+	
+	if(nRunning == 0)
+	{
+		//increase everyones wait time by there speed
+		//if a chars wait time is > BATTLE_WAIT_TIME they get the turn
+		//reset there wait to 0
+		while(initready == 0)
+		{
+			i=0;
+			while(i < 6)
+			{
+				//dead people don't move very fast
+				if(!InBattleChars[i].nDead)
+				{
+					InBattleChars[i].nWait += InBattleChars[i].nSpeed;
+					InBattleChars[i].nWait += random(0, 5); //throw some random into it
+				}
+
+				i++;
+			}
+
+			bigfound=0;
+			big = 0;
+			j=0;
+			//find the index with the highest wait over BATTLE_WAIT_TIME
+			while(j < 6)
+			{
+				if(InBattleChars[j].nWait >= BATTLE_WAIT_TIME)
+				{
+					if(!InBattleChars[j].nDead)
+					{
+						if(InBattleChars[j].nWait >= InBattleChars[big].nWait)
+						{
+							big = j;
+							bigfound=1;
+						}
+					}
+				}
+
+				j++;
+			}
+
+			if(bigfound)
+			{
+				if(InBattleChars[big].nCurCommand < 0) //i'm still the worlds biggest idiot, just slightly less then last time
+				{
+					DoStatus(big);
+					
+					//if the status caused a battle over state, go away
+					if(nRunning != 0)
+						return;
+
+					//if the status killed them, they lost the turn
+					//good god I'm the worst coder ever. I had the line as
+					//InBattleChars[nTurn].nDead - and since nTurn hasn't been set
+					//to anything yet, ofcourse it would cause the logic to go screwey
+					if(!InBattleChars[big].nDead)
+					{
+						nTurn = big;
+						initready = 1; //break out of the loop
+					}
+				}
+				else
+				{
+					InBattleChars[big].nWait = BATTLE_WAIT_TIME; //just to keep the wait meter from exploding
+					//charging a command
+					if(InBattleChars[big].nCommandWait >= BatCommands[InBattleChars[big].nCurCommand].nWaitTime)
+					{
+						//execute the command
+						nCommand = InBattleChars[big].nCurCommand;
+						nSpell = InBattleChars[big].nCommandIndex; //so spells and skills don't explode
+						nDrawPlayerWindow = 0;
+						nTurn = big;
+						attacker = nTurn;
+						target = InBattleChars[big].nCommandTarget;
+						
+						//check to make sure the target is still valid. if not choose a new valid one 
+						//on the same side
+						if(InBattleChars[target].nDead)
+						{
+							//choose a new target monster
+							if(target > 2)
+							{
+								while(InBattleChars[target].nDead)
+								{
+									target = random(3, 5);
+								}
+							}
+							//for now spells target to allies will still hit dead units
+							//basically so that revive will work
+						}
+						
+						if(big > 2)
+						{
+							//if a monster is taking it's turn, show it
+							nMonsterActing = big;
+							DrawScreen();
+							Wait(20);
+						}
+						
+						CallFunction(BatCommands[nCommand].sFuncString);
+						//reset the command and charging
+						InBattleChars[big].nCurCommand = 0-1;
+						InBattleChars[big].nCommandWait = 0;
+						nTurn = 0-1;
+						nDrawPlayerWindow = 1;
+						InBattleChars[big].nWait = 0;
+						
+						if(big > 2)
+						{
+							Wait(20);
+							//if a monster is in it's acting pose, turn it off
+							nMonsterActing = 0-1;
+						}
+						
+						//if the function caused a battle over state, do go any further
+						if(nRunning != 0)
+							return;
+
+					}
+					else
+					{
+						//yeah you might want to actually CHARGE the skill
+						InBattleChars[big].nCommandWait++;
+					}
+				}
+				
+				DrawScreen();
+				wait(nBattleSpeed);
+			}
+			else
+			{
+				DrawScreen();
+				wait(nBattleSpeed);
+			}
+		}
+
+		//if your dead don't go here
+		if(InBattleChars[nTurn].nDead)
+			return;
+
+		nPointerPos = 0;
+		
+		if(nTurn > 2)
+		{
+			attacker = nTurn;
+			//monsters turn, they are stupid and always choose random commands
+			command = Random(0, 2);
+			while(InBattleChars[nTurn].nCommands[command] == negone)
+			{
+				command = Random(0, 2);
+			}
+
+			//set the stuff to make the monster wait
+			//monsters don't get the benefit of instants
+			ChooseTarget();
+			InBattleChars[nTurn].nCommandTarget = target;
+			InBattleChars[nTurn].nCurCommand = InBattleChars[nTurn].nCommands[command];
+			InBattleChars[nTurn].nCommandWait = 0;
+			InBattleChars[nTurn].nCommandIndex = command;
+			
+			/*nMonsterActing = nTurn;
+			DrawScreen();
+			Wait(20);
+			nCommand = InBattleChars[nTurn].nCommands[command];
+			nSpell = command;
+			ChooseTarget();
+			CallFunction(BatCommands[nCommand].sFuncString);
+			InBattleChars[nTurn].nWait = 0;
+			CheckDeath();
+			nMonsterActing=0;
+			nMonsterActing--;*/
+		}
+		else
+		{
+			attacker = nTurn;
+			
+			nPointerOn = 1;
+			
+			//show the notification in the window
+			PlaySound(nReadySound, 100);
+	
+			//wait for the enter key or the arrows and stuff
+			nPointerPos = 0;
+
+			while(again)
+			{
+				unpress(1);
+				target = nTurn;
+				again=0;
+				
+				while(!b1)
+				{
+					if(up)
+					{
+						nPointerPos--;
+					
+						if(nPointerPos < 0)
+							nPointerPos = 2;
+						
+						while(InBattleChars[nTurn].nCommands[nPointerPos] < 0)
+						{
+							nPointerPos--;
+						}
+					
+						Unpress(5);
+					}
+					else if(down)
+					{
+						nPointerPos++;
+	
+						if(nPointerPos > 2 || InBattleChars[nTurn].nCommands[nPointerPos] < 0)
+							nPointerPos = 0;
+					
+						Unpress(6);
+					}
+			
+					DrawScreen();
+					ShowPage();
+				}
+				Unpress(1);
+			
+				//carry out the command
+				//if it's an instant do it right now
+				if(BatCommands[InBattleChars[nTurn].nCommands[nPointerPos]].nWaitTime < 0)
+				{
+					nCommand = InBattleChars[nTurn].nCommands[nPointerPos];
+					
+					nPointerOn = 0;
+					
+					if(BatCommands[InBattleChars[nTurn].nCommands[nPointerPos]].nCmdType == 0)
+					{
+						nCommand = InBattleChars[nTurn].nCommands[nPointerPos];
+						ChooseTarget();
+					}
+					else if(BatCommands[InBattleChars[nTurn].nCommands[nPointerPos]].nCmdType == 1)
+					{
+						target = nTurn;
+					}
+					
+					//if they hit cancel, go back and do it again
+					if(target < 0)
+					{
+						again = 1;
+						nPointerOn = 1;
+					}
+					else
+					{
+						CallFunction(BatCommands[nCommand].sFuncString);
+						
+						if(BatCommands[InBattleChars[nTurn].nCommands[nPointerPos]].nCmdType == 2 && target < 0)
+						{
+							//they canceled out of a menu
+							again = 1;
+							nPointerOn = 1;
+						}
+						else
+						{
+							if(BatCommands[nCommand].nWaitTime < 0 && BatCommands[nCommand].nCmdType == 0)
+								InBattleChars[nTurn].nWait = 0;
+							nTurn = 0-1;
+							CheckDeath();
+						}
+					}
+				}
+				else
+				{
+					//they have to wait, so set the command and lose the turn
+					InBattleChars[nTurn].nCurCommand = InBattleChars[nTurn].nCommands[nPointerPos];
+					InBattleChars[nTurn].nCommandWait = 0;
+					nTurn = 0-1;
+				}
+			}
+			
+			nPointerOn = 0;
+		}
+	}
+}
+
+//show things like hp damage, miss all the stuff
+void ShowActionText(string text, int tar, int color)
+{
+	int x,y,i,img;
+
+	int width=TextWidth(nFont, text);
+	int height=FontHeight(nFont);
+	
+	//* 1.5 to scale the text a bit
+	width = (15*width)/10;
+	height = (15*height)/10;
+	
+	//make a new image the height of the font and width of the font * the len of the text
+	int img = NewImage(width, height);
+	
+	RectFill(0, 0, width, height, RGB(255, 0, 255), img);
+	
+	
+	FindCenter(tar, width, height);
+	x = nCenterX;
+	y = nCenterY;
+
+	if(tar < 3)
+	{
+		//player
+		y = 473; //cause it looks nice...mmmky?
+	}
+	else if(tar > 2)
+	{
+		//monster
+		y += ImageHeight(InBattleChars[tar].nImage)/2;
+	}
+
+	SuperPrintText(0, 0, TextWidth(nFont, text), FontHeight(nFont), img, nFont, text, 150, color);
+	
+	for(i=0;i<NUM_BOUNCY;i++)
+	{
+		DrawScreen();
+		TBlit(x, y-nBouncy[i], img, screen);
+		ShowPage();
+	}
+	
+	FreeImage(img);
+
+	Wait(nBattleSpeed*2);
+}

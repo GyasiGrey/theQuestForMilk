@@ -1,0 +1,681 @@
+//for the console
+#include "sys-v3console.vc"
+
+//the min and max steps till a battle
+#define MIN_BAT_SEPS 15
+#define MAX_BAT_SEPS 30
+
+//the power func that the skills level up on
+#define SKILL_LEVEL_FUNC 2
+
+//max number of items
+#define MAX_ITEMS 100
+//num of items shown in the item menu
+#define ITEM_MENU_SIZE 13
+//num of items shown in the battle item menu
+#define BATTLE_ITEM_MENU_SIZE 5
+
+//how much speed each char has to stack up to get the turn
+#define BATTLE_WAIT_TIME 1000
+
+//the max width of a line of text in a text box in pixels
+#define MAX_LINE_LENGTH 650
+//number of lines in a text box
+#define MAX_WRAP_LINES 4
+
+#include "v1_maineffects.vc"
+#include "menu.vc"
+#include "shop.vc"
+#include "splash.vc"
+#include "TextBat.vc"
+#include "misc.vc"
+
+//used for moving between maps
+int charx;
+int chary;
+
+//holds the map chars are in. used for saving
+string sMap;
+
+//=1 if it's a new game
+int nNewGame;
+
+//the font used
+int nFont;
+//the pointer
+int nPointer;
+//the downarrow animation
+int nDownPointerAnim;
+//bool to choose if the menu can open or not
+int nMenuCanOpen;
+//amount of money
+int nBling;
+//group vars - holds the index of the first party member, second party member, third party member
+int nParty[3];
+//the players entity
+int nPlayerEnt;
+//flags
+int nFlags[100];
+//sounds
+int nErrorSound;
+int nMenuMoveSound;
+int nMenuClickSound;
+int nHealSound;
+int nLevelUpSound;
+//handle of the map song playing
+int nMapSong;
+//the text that will show up on the save screne (like crono trigger)
+string sSceneName;
+//the window for the text box, so it's only generated once
+int nTextBoxBkg;
+//the number of stept till a battle
+int nBattleSteps;
+//the window bkg
+int nWindowBkgIndex;
+//=1 if textboxes in battle should wait for the user (exp gaining and the like)
+int nManualWait;
+//how fast the battle moves - higher number = slower
+int nBattleSpeed;
+//how fast the text moves - higher number = slower
+int nTextSpeed;
+//mostly a debugging int - =1 when battles are disabled
+int nBattles;
+
+void autoexec()
+{
+	//init the console
+	V3Console__Init();
+
+	//*****INIT STUFF*****
+	nMenuCanOpen = 0;
+	nManualWait = 1;
+	nWindowBkgIndex = 0;
+	nBattleSpeed = 10;
+	nTextSpeed = 1;
+	nManualWait = 1;
+	
+	//init the keys
+	SetKeys();
+
+	//init the items
+	InitItems();
+	
+	//init commands
+	InitCommands();
+	
+	//init more stuff
+	InitMenu();
+
+	//*****LOAD GRAPHICAL STUFF*****
+	//load the pointer
+	nPointer = LoadImage("pointer.png");
+		
+	//load the font
+	nFont = LoadFont("outline.png");
+	
+	//make the font variable width....cause grue told me to
+	EnableVariableWidth(nFont);
+	
+	//load the down arrow anim
+	nDownPointerAnim = LoadAnimation("downpointeranim.png", 32, 32);
+	
+	//sounds
+	nErrorSound = LoadSound("error.wav");
+	nMenuMoveSound = LoadSound("menumove.wav");
+	nMenuClickSound = LoadSound("menuclick.wav");
+	nHealSound = LoadSound("heal.wav");
+	nLevelUpSound = LoadSound("levelup.wav");
+	
+	//bkg for the textbox
+	nTextBoxBkg = GenerateWindow(700, 140);
+
+	StartGame();		
+}
+
+void StartGame()
+{
+	//splash screen
+	Splash();
+	
+	InitCharsOnce();
+	
+	TitleScreen();
+	
+	//hook the menu
+	HookRetrace("CheckOpenMenu");
+	
+	nMenuCanOpen = 1;
+	
+	nMapSong = 0-1;
+	
+	if(nNewGame == 1)
+	{
+		//setup the chars stats and names and stuff
+		nParty[0]=0;
+		nParty[1]=0-1;
+		nParty[2]=0-1;
+
+		sSceneName = "A day like any other";
+		Goto(233, 101, "farm.map");
+	}
+	else
+	{
+		Goto(charx, chary, sMap);
+	}
+}
+
+void ShutdownGame()
+{
+	FreeFont(nFont);
+	FreeImage(nPointer);
+	FreeImage(nTextBoxBkg);
+	FreeSound(nErrorSound);
+	FreeSound(nMenuMoveSound);
+	FreeSound(nMenuClickSound);
+	FreeSound(nHealSound);
+	FreeSound(nLevelUpSound);
+	FreeAnimation(nDownPointerAnim);
+	ShutDownMenu();
+	Exit("");
+}
+
+string GetSceneName(int i)
+{
+	string retval;
+
+	int handle = FileOpen("save" + str(i) + ".sav", FILE_READ);
+	
+	if(handle)
+	{
+		retval = FileReadString(handle);
+		FileClose(handle);
+		return retval;
+	}
+	else
+	{
+		return "";
+	}
+
+}
+
+void SaveGame(int i)
+{
+	int x;
+	int j;
+	int handle = FileOpen("save" + str(i) + ".sav", FILE_WRITE);
+	
+	//scenename
+	FileWriteString(handle, sSceneName);
+
+	//manual wait
+	FileWriteWord(handle, nManualWait);
+	
+	//battle speed
+
+	FileWriteWord(handle, nBattleSpeed);
+	
+
+	//text speed
+
+	FileWriteWord(handle, nTextSpeed);
+		
+	//map
+	FileWriteString(handle, sMap);
+
+	//x, y coords
+	FileWriteWord(handle, entity.x[nPlayerEnt]);
+	FileWriteWord(handle, entity.y[nPlayerEnt]);
+	
+	//can't handle negatives, so write 20 instead
+
+	if(nParty[0] < 0)
+		FileWriteWord(handle, 20);
+	else
+		FileWriteWord(handle, nParty[0]);
+	
+
+	if(nParty[1] < 0)
+		FileWriteWord(handle, 20);
+	else
+		FileWriteWord(handle, nParty[1]);
+
+	
+
+	if(nParty[2] < 0)
+		FileWriteWord(handle, 20);
+	else
+		FileWriteWord(handle, nParty[2]);
+
+
+	//write out the bling
+	FileWriteWord(handle, nBling);
+	
+	//write out the character stuff
+	for(x=0;x<10;x++)
+	{
+		//hp/mp
+		FileWriteWord(handle, BatChars[x].nHp);
+		FileWriteWord(handle, BatChars[x].nMaxHp);
+		FileWriteWord(handle, BatChars[x].nMp);
+		FileWriteWord(handle, BatChars[x].nMaxMp);
+		//stats
+		FileWriteWord(handle, BatChars[x].nStr);
+		FileWriteWord(handle, BatChars[x].nDex);
+		FileWriteWord(handle, BatChars[x].nInt);
+		FileWriteWord(handle, BatChars[x].nCon);
+		FileWriteWord(handle, BatChars[x].nSpeed);
+		//spells
+		for(j=0;j<10;j++)
+		{
+			if(BatChars[x].nSpells[j] < 0)
+				FileWriteWord(handle, 20);
+			else
+				FileWriteWord(handle, BatChars[x].nSpells[j]);
+			FileWriteWord(handle, BatChars[x].nSpellLevel[j]);
+			FileWriteWord(handle, BatChars[x].nSpellExp[j]);
+		}
+		//exp/lvl
+		FileWriteWord(handle, BatChars[x].nExp);
+		FileWriteWord(handle, BatChars[x].nExpDumped);
+		FileWriteWord(handle, BatChars[x].nLvl);
+		//dead
+		FileWriteWord(handle, BatChars[x].nDead);
+		//equip
+		for(j=0;j<5;j++)
+		{
+			if(BatChars[x].nEquip[j] < 0)
+				FileWriteWord(handle, MAX_ITEMS);
+			else
+				FileWriteWord(handle, BatChars[x].nEquip[j]);
+		}
+	}
+	
+	for(x=0;x<100;x++)
+	{
+		FileWriteWord(handle, nFlags[x]);
+	}
+	
+	for(x=0;x<MAX_ITEMS;x++)
+	{
+		if(nItemIndex[x] < 0)
+		{
+			FileWriteWord(handle, 50);
+			FileWriteWord(handle, 0);
+		}
+		else
+		{
+			FileWriteWord(handle, nItemIndex[x]);
+			FileWriteWord(handle, nItemCount[x]);
+		}
+	}
+	
+	FileClose(handle);
+}
+
+void LoadGame(int i)
+{
+	int z;
+	int j;
+	int handle = FileOpen("save" + str(i) + ".sav", FILE_READ);
+	
+	sSceneName = FileReadString(handle);
+	
+	//manual wait
+	nManualWait = FileReadWord(handle);
+	
+	//battle speed
+	nBattleSpeed = FileReadWord(handle);
+	
+	//text speed
+	nTextSpeed = FileReadWord(handle);
+
+	sMap = FileReadString(handle);
+	
+	charx = FileReadWord(handle)/16;
+	chary = FileReadWord(handle)/16;
+	
+	nParty[0] = FileReadWord(handle);
+	nParty[1] = FileReadWord(handle);
+	nParty[2] = FileReadWord(handle);
+	
+	//if the num is 20 it really should be -1
+
+	for(z=0;z<3;z++)
+	{
+		if(nParty[z] == 20)
+			nParty[z] = 0-1;
+	}
+	
+	nBling = FileReadWord(handle);
+
+	for(z=0;z<10;z++)
+	{
+		//hp/mp
+		BatChars[z].nHp = FileReadWord(handle);
+		BatChars[z].nMaxHp = FileReadWord(handle);
+		BatChars[z].nMp = FileReadWord(handle);
+		BatChars[z].nMaxMp = FileReadWord(handle);
+		//stats
+		BatChars[z].nStr = FileReadWord(handle);
+		BatChars[z].nDex = FileReadWord(handle);
+		BatChars[z].nInt = FileReadWord(handle);
+		BatChars[z].nCon = FileReadWord(handle);
+		BatChars[z].nSpeed = FileReadWord(handle);
+		//spells
+		for(j=0;j<10;j++)
+		{
+			BatChars[z].nSpells[j] = FileReadWord(handle);
+			
+			if(BatChars[z].nSpells[j] == 20)
+				BatChars[z].nSpells[j] = 0-1;
+				
+			BatChars[z].nSpellLevel[j] = FileReadWord(handle);
+			BatChars[z].nSpellExp[j] = FileReadWord(handle);
+		}
+		//exp/lvl
+		BatChars[z].nExp = FileReadWord(handle);
+		BatChars[z].nExpDumped = FileReadWord(handle);
+		BatChars[z].nLvl = FileReadWord(handle);
+		//dead
+		BatChars[z].nDead = FileReadWord(handle);
+		//equip
+		for(j=0;j<5;j++)
+		{
+			BatChars[z].nEquip[j] = FileReadWord(handle);
+			
+			if(BatChars[z].nEquip[j] == MAX_ITEMS)
+				BatChars[z].nEquip[j] = 0-1;
+		}
+	}
+	
+	for(z=0;z<100;z++)
+	{
+		nFlags[z] = FileReadWord(handle);
+	}
+	
+	for(z=0;z<MAX_ITEMS;z++)
+	{
+		nItemIndex[z] = FileReadWord(handle);
+		if(nItemIndex[z] == 50)
+		{
+			nItemIndex[z] = 0-1;
+		}
+		nItemCount[z] = FileReadWord(handle);
+	}
+
+	FileClose(handle);
+}
+
+void TitleScreen()
+{
+	int bkg = LoadImage("title.png");
+	int done;
+	int pointerpos;
+	
+	int win;
+	
+	done = 0;
+	
+
+	win = GenerateWindow(200, 85);
+	
+	while(done==0)
+	{
+		Blit(0, 0, bkg, screen);
+		Blit(400, 375, win, screen);
+		
+		PrintString(440, 390, screen, nFont, "New Game");
+		PrintString(440, 405, screen, nFont, "Load Game");
+		PrintString(440, 420, screen, nFont, "Button Config");
+		PrintString(440, 435, screen, nFont, "Exit");
+		
+		TBlit(410, 390 + (pointerpos*15), nPointer, screen);
+		ShowPage();
+		
+		if(up)
+		{
+			if(pointerpos > 0)
+			{
+				pointerpos--;
+				playsound(nMenuMoveSound, 100);
+			}
+				
+			unpress(5);
+		}
+		
+		if(down)
+		{
+			if(pointerpos < 3)
+			{
+				pointerpos++;
+				playsound(nMenuMoveSound, 100);
+			}
+
+			unpress(6);
+		}
+		
+		if(b1)
+		{
+			unpress(1);
+			
+			if(pointerpos == 0)
+			{
+				nNewGame = 1;
+				done=1;
+				playsound(nMenuClickSound, 100);
+			}
+			else if(pointerpos == 1)
+			{
+				//load game window
+				playsound(nMenuClickSound, 100);
+				if(LoadMenu())
+				{
+					nNewGame = 0;
+					done=1;
+				}
+			}
+			else if(pointerpos == 2)
+			{
+				//button config menu
+				ButtonMenu();
+			}
+			else if(pointerpos == 3)
+			{
+				Exit("");
+			}
+		}
+	}
+	
+	FreeImage(bkg);
+	FreeImage(win);
+}
+
+//move to another location on the same map
+void Warp(int x, int y)
+{
+	Blit(0, 0, screen, crossfade_img);
+
+	entity.x[nPlayerEnt] = x*16;
+	entity.y[nPlayerEnt] = y*16;
+	
+	Render();
+	
+	CrossFade(50);
+}
+
+//move to another map
+void Goto(int x, int y, string _map)
+{
+	charx=x;
+	chary=y;
+	sMap = _map;
+	map(_map);
+}
+
+void GetBling(int b)
+{
+	nBling += b;
+	TextBox("Got " + str(b) + " Bling!");
+}
+
+/***********************************************
+*Wait for a certan number of ticks             *
+*stripped right out of sully                   *
+************************************************/
+void Wait(int _dur)
+{
+	timer = 0;
+	while (timer<_dur)
+	{
+		//one stinkin render call was screwing up everything
+		ShowPage();
+	}
+}
+
+void GameOver()
+{
+	nMenuCanOpen = 0;
+	FadeOut(50);
+	Wait(150);
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+	StartGame();
+}
+
+int FileExists(string file)
+{
+	int handle = FileOpen(file, FILE_READ);
+	
+	if(!handle)
+	{
+		FileClose(handle);
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+void SuperPrintText(int x, int y, int fwidth, int fheight, int dest, int font, string text, int scale, int color)
+{
+	int i,j;
+
+	int width=fwidth*len(text);
+	int height=fheight;
+	
+	//make a new image the height of the font and width of the font * the len of the text
+	int img = NewImage(width, height);
+	
+	//fill it with RGB(255, 0, 255) so the blits will be transparent
+	RectFill(0, 0, width, height, RGB(255, 0, 255), img);
+	
+	//might want to draw the text to the image
+
+	PrintString(0, 0, img, font, text);
+	
+	//go through the image and replace all the RGB(255, 255, 255) with color
+	for(i=0;i<height;i++)
+	{
+		for(j=0;j<width;j++)
+		{
+			if(GetPixel(j, i, img) == RGB(255, 255, 255))
+			{
+				SetPixel(j, i, color, img);
+			}
+		}
+	}
+	
+	
+	TScaleBlit(x, y, (((scale*10)/100)*width)/10, (((scale*10)/100)*height)/10, img, dest);
+	FreeImage(img);
+}
+
+//check to see if we should open the menu
+void CheckOpenMenu()
+{
+	if(b3)
+	{
+		MainMenu();
+	}
+}
+
+// *****TAKEN FROM PARALLEL 7*****
+// Credit: Interference
+// A variant on tSB's wraptext function. Modified for v3, it can now handle variable
+// width fonts.
+// It returns the total number of lines the passed string was cut into, so you'd use
+// it buy assigning it to an integer variable (eg. numlines = WrapText(myfont, "hello mum"); )
+// which will store how many lines the string was cut to.
+
+// Its used in the textbox routine and maybe in a few other places
+
+string textwrap[10];		// Stores output from the wrap text routine
+
+int WrapText(int txtfont, string s)
+{
+	int curline, curpos, countpos;
+	int charwrap;
+	int i;
+	string tempst, countst;
+
+	for(i=0;i<10;i++)
+	{
+		textwrap[i] = "";
+	}
+	
+	curline=0;
+	tempst=s;
+	charwrap = MAX_LINE_LENGTH;
+
+	// Just one line of text? Don't bother processing it
+
+	if (TextWidth(txtfont, s)<charwrap)
+	{
+		textwrap[0]=s;
+		return 1;
+	}
+	
+	// Calculate how many characters fit in a string that's the maximum line length
+	// and stick this number in charwrap
+ 
+	while(len(tempst)>0 && curline<MAX_WRAP_LINES)
+	{
+		countst = "";
+		charwrap = 0;
+		countpos = 1;
+
+		if(TextWidth(txtfont, tempst) >= MAX_LINE_LENGTH)
+		{
+			while(TextWidth(txtfont, countst) <= MAX_LINE_LENGTH)
+			{
+				countst = left(tempst, countpos);
+				countpos++;
+			}
+			charwrap = len(countst)-1;
+		}
+		else
+		{
+			charwrap = len(tempst);
+			tempst = tempst+" ";
+		}
+
+		// Start at the charwrap-th char and go backwards until we find a space.
+		// Chop it there
+	
+		for(curpos=charwrap; curpos>0; curpos--)
+		{
+			if(strcmp(mid(tempst,curpos,1), " ") = 0)
+			{       
+				textwrap[curline]=left(tempst,curpos);
+				tempst=right(tempst,len(tempst)-curpos-1);
+				curline++;
+				curpos=0-1; // Jump out of the loop
+			}
+		}
+	}
+	return curline;
+}

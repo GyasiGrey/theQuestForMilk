@@ -1,0 +1,492 @@
+/*********************************
+Chars.vc
+Home to the characters, enemies, and their stats
+**********************************/
+
+struct BattleChar
+{
+	string sName;
+	
+	int nHp;
+	int nMaxHp;
+	int nMp;
+	int nMaxMp;
+	int nMagicPow;
+	int nMagicDef;
+	int nMagicEvade;
+	int nMagicHit;
+	int nAttackPow;
+	int nDefense;
+	int nEvade;
+	int nHit;	
+	
+	int nOriginalMagicPow;
+	int nOriginalMagicDef;
+	int nOriginalMagicEvade;
+	int nOriginalMagicHit;
+	int nOriginalAttackPow;
+	int nOriginalDefense;
+	int nOriginalEvade;
+	int nOriginalHit;
+	
+	int nEquip[5];
+	
+	int nStr;
+	int nDex;
+	int nInt;
+	int nWis;
+	int nCon;
+	int nSpeed;
+
+	string sImage;				//for monsters
+	int nImage;
+	
+	int nCommands[3];			//holds the commands
+	int nSpells[10];			//the chars spells
+	int nSpellLevel[10];			//the levels the spells are at
+	int nSpellExp[10];			//the amount of exp the spell has
+	
+	int nStatus[10];			//the status ailments/enchantments on the char
+	int nStatusTicks[10];			//how long they lasts
+	int nStatusPow[10];			//power of the status ailment thingy
+	
+	int nWait;				//once it reaches MAJIK NUMBRZ!! they get the turn
+	
+	int nExp;				//their exp
+	//int nExpDumped;				//amt of exp dumped into skills this level
+	
+	int nBling;				//how much bling the monster carries
+	int nTNL;				//how much till next level
+	int nLvl;
+	
+	int nDead;				//true when they're.....dead.... (see I can use a contraction correctly!)
+	
+	int nCanBeBanished;			//You can't kill me....I'm invincible!!!
+	
+	int nCurCommand;			//the command they chose to execute
+	int nCommandIndex;			//the index of the spell/skill in the chars spell list
+
+	int nCommandWait;			//how long the command has been charging
+	int nCommandTarget;
+}
+
+BattleChar BatChars[20]; //place to hold the base info about chars.
+
+BattleChar InBattleChars[6]; //place to hold the chars that are in battle
+
+void InitCharsOnce()
+{
+	int i;
+	int negone = 0;
+	negone = negone - 1;
+
+	BatChars[0].sName = "Thush";
+	BatChars[0].nHp = 85;
+	BatChars[0].nMaxHp = 85;
+	BatChars[0].nMp = 0;
+	BatChars[0].nMaxMp = 0;
+	BatChars[0].nDead = 0;
+
+	BatChars[0].nStr = 50;
+	BatChars[0].nDex = 50;
+	BatChars[0].nInt = 4;
+	BatChars[0].nWis = 2;
+	BatChars[0].nCon = 30;
+	BatChars[0].nSpeed = 30;
+
+	BatChars[0].nExp = 0;
+//	BatChars[0].nExpDumped = 0;
+	BatChars[0].nLvl = 1;
+	BatChars[0].nTNL = 1000;
+
+	BatChars[0].nCommands[0] = 0;
+	BatChars[0].nCommands[1] = 13;
+	BatChars[0].nCommands[2] = 12;
+
+	BatChars[0].nSpells[0] = 9;
+	BatChars[0].nSpells[1] = negone;
+	BatChars[0].nSpells[2] = negone;
+	BatChars[0].nSpells[3] = negone;
+	BatChars[0].nSpells[4] = negone;
+	BatChars[0].nSpells[5] = negone;
+	BatChars[0].nSpells[6] = negone;
+	BatChars[0].nSpells[7] = negone;
+	BatChars[0].nSpells[8] = negone;
+	BatChars[0].nSpells[9] = negone;
+	BatChars[0].nSpellLevel[0] = 65;
+	BatChars[0].nSpellLevel[1] = 0;
+	BatChars[0].nSpellLevel[2] = 0;
+	BatChars[0].nSpellLevel[3] = 0;
+	BatChars[0].nSpellLevel[4] = 0;
+	BatChars[0].nSpellLevel[5] = 0;
+	BatChars[0].nSpellLevel[6] = 0;
+	BatChars[0].nSpellLevel[7] = 0;
+	BatChars[0].nSpellLevel[8] = 0;
+	BatChars[0].nSpellLevel[9] = 0;
+
+	for(i=0;i<5;i++)
+	{
+		BatChars[0].nEquip[i] = 0-1;
+	}
+	
+	for(i=0;i<10;i++)
+	{
+		BatChars[0].nStatus[i] = 0-1;
+	}
+	
+
+	BatChars[1].sName = "Rhac";
+	BatChars[1].nHp = 30;
+	BatChars[1].nMaxHp = 30;
+	BatChars[1].nMp = 50;
+	BatChars[1].nMaxMp = 50;
+	BatChars[1].nDead = 0;
+
+	BatChars[1].nStr = 4;
+	BatChars[1].nDex = 10;
+	BatChars[1].nInt = 50;
+	BatChars[1].nWis = 30;
+	BatChars[1].nCon = 7;
+	BatChars[1].nSpeed = 25;
+
+	BatChars[1].nExp = 0;
+//	BatChars[1].nExpDumped = 0;
+	BatChars[1].nLvl = 1;
+	BatChars[1].nTNL = 1500;
+
+	BatChars[1].nCommands[0] = 0;
+	BatChars[1].nCommands[1] = 1;
+	BatChars[1].nCommands[2] = 12;
+	
+	BatChars[1].nSpells[0] = 2;
+	BatChars[1].nSpells[1] = 5;
+	BatChars[1].nSpells[2] = 14;
+	BatChars[1].nSpells[3] = negone;
+	BatChars[1].nSpells[4] = negone;
+	BatChars[1].nSpells[5] = negone;
+	BatChars[1].nSpells[6] = negone;
+	BatChars[1].nSpells[7] = negone;
+	BatChars[1].nSpells[8] = negone;
+	BatChars[1].nSpells[9] = negone;
+	BatChars[1].nSpellLevel[0] = 20;
+	BatChars[1].nSpellLevel[1] = 18;
+	BatChars[1].nSpellLevel[2] = 65;
+	BatChars[1].nSpellLevel[3] = 0;
+	BatChars[1].nSpellLevel[4] = 0;
+	BatChars[1].nSpellLevel[5] = 0;
+	BatChars[1].nSpellLevel[6] = 0;
+	BatChars[1].nSpellLevel[7] = 0;
+	BatChars[1].nSpellLevel[8] = 0;
+	BatChars[1].nSpellLevel[9] = 0;
+	
+	for(i=0;i<5;i++)
+	{
+		BatChars[1].nEquip[i] = 0-1;
+	}
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[1].nStatus[i] = 0-1;
+	}
+
+	BatChars[2].sName = "Alea";
+	BatChars[2].nHp = 60;
+	BatChars[2].nMaxHp = 60;
+	BatChars[2].nMp = 75;
+	BatChars[2].nMaxMp = 75;
+	BatChars[2].nDead = 0;
+	
+	BatChars[2].nStr = 9;
+	BatChars[2].nDex = 12;
+	BatChars[2].nInt = 23;
+	BatChars[2].nWis = 45;
+	BatChars[2].nCon = 18;
+	BatChars[2].nSpeed = 20;
+
+	BatChars[2].nExp = 0;
+//	BatChars[2].nExpDumped = 0;
+	BatChars[2].nLvl = 1;
+	BatChars[2].nTNL = 1200;
+
+	BatChars[2].nCommands[0] = 0;
+	BatChars[2].nCommands[1] = 1;
+	BatChars[2].nCommands[2] = 12;
+
+	BatChars[2].nSpells[0] = 3;
+	BatChars[2].nSpells[1] = 7;
+	BatChars[2].nSpells[2] = 10;
+	BatChars[2].nSpells[3] = 0-1;
+	BatChars[2].nSpells[4] = 0-1;
+	BatChars[2].nSpells[5] = negone;
+	BatChars[2].nSpells[6] = negone;
+	BatChars[2].nSpells[7] = negone;
+	BatChars[2].nSpells[8] = negone;
+	BatChars[2].nSpells[9] = negone;
+	BatChars[2].nSpellLevel[0] = 25;
+	BatChars[2].nSpellLevel[1] = 28;
+	BatChars[2].nSpellLevel[2] = 26;
+	BatChars[2].nSpellLevel[3] = 0;
+	BatChars[2].nSpellLevel[4] = 0;
+	BatChars[2].nSpellLevel[5] = 0;
+	BatChars[2].nSpellLevel[6] = 0;
+	BatChars[2].nSpellLevel[7] = 0;
+	BatChars[2].nSpellLevel[8] = 0;
+	BatChars[2].nSpellLevel[9] = 0;
+	
+	for(i=0;i<5;i++)
+	{
+		BatChars[2].nEquip[i] = 0-1;
+	}
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[2].nStatus[i] = 0-1;
+	}
+
+	BatChars[3].sName = "Toldur";
+	BatChars[3].nHp = 60;
+	BatChars[3].nMaxHp = 60;
+	BatChars[3].nMp = 0;
+	BatChars[3].nMaxMp = 0;
+	BatChars[3].nDead = 0;
+
+	BatChars[3].nStr = 40;
+	BatChars[3].nDex = 50;
+	BatChars[3].nInt = 10;
+	BatChars[3].nWis = 5;
+	BatChars[3].nCon = 13;
+	BatChars[3].nSpeed = 30;
+
+	BatChars[3].nExp = 0;
+//	BatChars[3].nExpDumped = 0;
+	BatChars[3].nLvl = 1;
+	BatChars[3].nTNL = 1300;
+
+	BatChars[3].nCommands[0] = 0;
+	BatChars[3].nCommands[1] = 13;
+	BatChars[3].nCommands[2] = 12;
+
+	BatChars[3].nSpells[0] = 15;
+	BatChars[3].nSpells[1] = 16;
+	BatChars[3].nSpells[2] = 17;
+	BatChars[3].nSpells[3] = negone;
+	BatChars[3].nSpells[4] = negone;
+	BatChars[3].nSpells[5] = negone;
+	BatChars[3].nSpells[6] = negone;
+	BatChars[3].nSpells[7] = negone;
+	BatChars[3].nSpells[8] = negone;
+	BatChars[3].nSpells[9] = negone;
+	BatChars[3].nSpellLevel[0] = 78;
+	BatChars[3].nSpellLevel[1] = 86;
+	BatChars[3].nSpellLevel[2] = 76;
+	BatChars[3].nSpellLevel[3] = 0;
+	BatChars[3].nSpellLevel[4] = 0;
+	BatChars[3].nSpellLevel[5] = 0;
+	BatChars[3].nSpellLevel[6] = 0;
+	BatChars[3].nSpellLevel[7] = 0;
+	BatChars[3].nSpellLevel[8] = 0;
+	BatChars[3].nSpellLevel[9] = 0;
+
+	for(i=0;i<5;i++)
+	{
+		BatChars[3].nEquip[i] = 0-1;
+	}
+	
+	for(i=0;i<10;i++)
+	{
+		BatChars[3].nStatus[i] = 0-1;
+	}
+
+	BatChars[10].sName = "Mouse";
+	BatChars[10].nHp = 30;
+	BatChars[10].nMaxHp = 30;
+	BatChars[10].nMp = 0;
+	BatChars[10].nMaxMp = 0;
+
+	BatChars[10].nMagicPow = 40;
+	BatChars[10].nMagicDef = 50;
+	BatChars[10].nMagicEvade = 10;
+	BatChars[10].nMagicHit = 95;
+	BatChars[10].nAttackPow = 25;
+	BatChars[10].nDefense = 20;
+	BatChars[10].nEvade = 10;
+	BatChars[10].nHit = 70;
+	BatChars[10].nSpeed = 40;
+	
+	BatChars[10].nExp = 300;
+	BatChars[10].nBling = 100;
+	BatChars[10].nLvl = 1;
+
+	BatChars[10].sImage = "mouse.png";
+	BatChars[10].nCommands[0] = 0;
+	BatChars[10].nCommands[1] = 0-1;
+	BatChars[10].nCommands[2] = 0-1;
+	BatChars[10].nSpellLevel[0] = 0;
+	BatChars[10].nSpellLevel[1] = 0;
+	BatChars[10].nSpellLevel[2] = 0;
+	BatChars[10].nCanBeBanished = 1;
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[10].nStatus[i] = 0-1;
+	}
+
+	BatChars[11].sName = "Guard Dog";
+	BatChars[11].nHp = 150;
+	BatChars[11].nMaxHp = 150;
+	BatChars[11].nMp = 55;
+	BatChars[11].nMaxMp = 55;
+
+	BatChars[11].nMagicPow = 25;
+	BatChars[11].nMagicDef = 65;
+	BatChars[11].nMagicEvade = 25; //so he's not spell bait...well less spell bait
+	BatChars[11].nMagicHit = 170; //so he has a chance to cast on the mage and cleric
+	BatChars[11].nAttackPow = 30;
+	BatChars[11].nDefense = 20;
+	BatChars[11].nEvade = 15;
+	BatChars[11].nHit = 110;
+	BatChars[11].nSpeed = 30;
+	
+	BatChars[11].nExp = 500;
+	BatChars[11].nLvl = 3;
+
+	BatChars[11].sImage = "dog.png";
+	BatChars[11].nCommands[0] = 0;
+	BatChars[11].nCommands[1] = 2;
+	BatChars[11].nCommands[2] = 0;
+	BatChars[11].nSpellLevel[0] = 0;
+	BatChars[11].nSpellLevel[1] = 15;
+	BatChars[11].nSpellLevel[2] = 0;
+	BatChars[11].nCanBeBanished = 1;
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[11].nStatus[i] = 0-1;
+	}
+
+	BatChars[12].sName = "Golem";
+	BatChars[12].nHp = 350;
+	BatChars[12].nMaxHp = 350;
+	BatChars[12].nMp = 200;
+	BatChars[12].nMaxMp = 200;
+
+	BatChars[12].nMagicPow = 60;
+	BatChars[12].nMagicDef = 65;
+	BatChars[12].nMagicEvade = 35; 
+	BatChars[12].nMagicHit = 200; 
+	BatChars[12].nAttackPow = 50;
+	BatChars[12].nDefense = 40;
+	BatChars[12].nEvade = 15;
+	BatChars[12].nHit = 130;
+	BatChars[12].nSpeed = 20;
+	
+	BatChars[12].nExp = 1000;
+	BatChars[12].nLvl = 7;
+	BatChars[12].nCanBeBanished = 1;
+
+	BatChars[12].sImage = "golem.png";
+	BatChars[12].nCommands[0] = 0;
+	BatChars[12].nCommands[1] = 5;
+	BatChars[12].nCommands[2] = 2;
+	BatChars[12].nSpellLevel[0] = 0;
+	BatChars[12].nSpellLevel[1] = 50;
+	BatChars[12].nSpellLevel[2] = 10;
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[12].nStatus[i] = 0-1;
+	}
+
+	BatChars[13].sName = "Sting Ray";
+	BatChars[13].nHp = 175;
+	BatChars[13].nMaxHp = 175;
+	BatChars[13].nMp = 200;
+	BatChars[13].nMaxMp = 200;
+
+	BatChars[13].nMagicPow = 30;
+	BatChars[13].nMagicDef = 55;
+	BatChars[13].nMagicEvade = 35; 
+	BatChars[13].nMagicHit = 180; 
+	BatChars[13].nAttackPow = 60;
+	BatChars[13].nDefense = 40;
+	BatChars[13].nEvade = 15;
+	BatChars[13].nHit = 130;
+	BatChars[13].nSpeed = 20;
+	
+	BatChars[13].nExp = 600;
+	BatChars[13].nLvl = 6;
+	BatChars[13].nCanBeBanished = 1;
+
+	BatChars[13].sImage = "sting.png";
+	BatChars[13].nCommands[0] = 0;
+	BatChars[13].nCommands[1] = 5;
+	BatChars[13].nCommands[2] = 4;
+	BatChars[13].nSpellLevel[0] = 0;
+	BatChars[13].nSpellLevel[1] = 35;
+	BatChars[13].nSpellLevel[2] = 10;
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[13].nStatus[i] = 0-1;
+	}
+
+	BatChars[19].sName = "Milk Demon";
+	BatChars[19].nHp = 1000;
+	BatChars[19].nMaxHp = 1000;
+	BatChars[19].nMp = 900;
+	BatChars[19].nMaxMp = 900;
+
+	BatChars[19].nMagicPow = 40;
+	BatChars[19].nMagicDef = 65;
+	BatChars[19].nMagicEvade = 35; 
+	BatChars[19].nMagicHit = 200; 
+	BatChars[19].nAttackPow = 90;
+	BatChars[19].nDefense = 50;
+	BatChars[19].nEvade = 15;
+	BatChars[19].nHit = 130;
+	BatChars[19].nSpeed = 30;
+	
+	BatChars[19].nExp = 1000;
+	BatChars[19].nLvl = 20;
+
+	BatChars[19].sImage = "demon.png";
+	BatChars[19].nCommands[0] = 0;
+	BatChars[19].nCommands[1] = 4;
+	BatChars[19].nCommands[2] = 5;
+	BatChars[19].nSpellLevel[0] = 0;
+	BatChars[19].nSpellLevel[1] = 10;
+	BatChars[19].nSpellLevel[2] = 50;
+	BatChars[19].nCanBeBanished = 0;
+
+	for(i=0;i<10;i++)
+	{
+		BatChars[19].nStatus[i] = 0-1;
+	}
+}
+
+void InitChars(int src, int dest)
+{
+	int i;
+	
+	InBattleChars[dest].nMagicPow = BatChars[src].nInt + Items[BatChars[src].nEquip[0]].nMagicPow + Items[BatChars[src].nEquip[1]].nMagicPow + Items[BatChars[src].nEquip[2]].nMagicPow + Items[BatChars[src].nEquip[3]].nMagicPow + Items[BatChars[src].nEquip[4]].nMagicPow;
+	InBattleChars[dest].nMagicDef = (BatChars[src].nWis/2) + Items[BatChars[src].nEquip[0]].nMagicDef + Items[BatChars[src].nEquip[1]].nMagicDef + Items[BatChars[src].nEquip[2]].nMagicDef + Items[BatChars[src].nEquip[3]].nMagicDef + Items[BatChars[src].nEquip[4]].nMagicDef;
+	InBattleChars[dest].nMagicEvade = BatChars[src].nWis + Items[BatChars[src].nEquip[0]].nMagicEvade + Items[BatChars[src].nEquip[1]].nMagicEvade + Items[BatChars[src].nEquip[2]].nMagicEvade + Items[BatChars[src].nEquip[3]].nMagicEvade + Items[BatChars[src].nEquip[4]].nMagicEvade;
+	InBattleChars[dest].nMagicHit = (BatChars[src].nInt*2)+ Items[BatChars[src].nEquip[0]].nMagicHit + Items[BatChars[src].nEquip[1]].nMagicHit + Items[BatChars[src].nEquip[2]].nMagicHit + Items[BatChars[src].nEquip[3]].nMagicHit + Items[BatChars[src].nEquip[4]].nMagicHit;
+	InBattleChars[dest].nAttackPow = BatChars[src].nStr + Items[BatChars[src].nEquip[0]].nAttackPow + Items[BatChars[src].nEquip[1]].nAttackPow + Items[BatChars[src].nEquip[2]].nAttackPow + Items[BatChars[src].nEquip[3]].nAttackPow + Items[BatChars[src].nEquip[4]].nAttackPow;
+	InBattleChars[dest].nDefense = (BatChars[src].nCon/2) + Items[BatChars[src].nEquip[0]].nDefense + Items[BatChars[src].nEquip[1]].nDefense + Items[BatChars[src].nEquip[2]].nDefense + Items[BatChars[src].nEquip[3]].nDefense + Items[BatChars[src].nEquip[4]].nDefense;
+	InBattleChars[dest].nEvade = (BatChars[src].nDex/2) + Items[BatChars[src].nEquip[0]].nEvade + Items[BatChars[src].nEquip[1]].nEvade + Items[BatChars[src].nEquip[2]].nEvade + Items[BatChars[src].nEquip[3]].nEvade + Items[BatChars[src].nEquip[4]].nEvade;
+	InBattleChars[dest].nHit = (BatChars[src].nDex*2) + Items[BatChars[src].nEquip[0]].nHit + Items[BatChars[src].nEquip[1]].nHit + Items[BatChars[src].nEquip[2]].nHit + Items[BatChars[src].nEquip[3]].nHit + Items[BatChars[src].nEquip[4]].nHit;
+	
+	//add status from eq
+	for(i=0;i<5;i++)
+	{
+		if(BatChars[src].nEquip[i] >= 0)
+		{
+			if(Items[BatChars[src].nEquip[i]].nStatus >= 0)
+			{
+				AddStatus(dest, Items[BatChars[src].nEquip[i]].nStatus, Items[BatChars[src].nEquip[i]].nStatusPow, 0-1);
+				//Messagebox("char " + str(dest) + " got status " + str(Items[BatChars[src].nEquip[i]].nStatus) + " from eq " + str(BatChars[src].nEquip[i]) + " in slot " + str(i));
+			}
+		}
+	}
+}

@@ -1,0 +1,1593 @@
+#define MAX_COMMANDS 30
+
+/*********************************
+commands.vc
+Home to the commands and the commands virtual functions
+**********************************/
+
+struct BattleCommand
+{
+	string sName;
+	string sFuncString;
+	int nMpCost;
+	int nAggressive; 		//if 1 pointer starts on enemies, else starts on players
+	int nMenu; 			//if 1 can be used in the menu
+	string sMenuFunc;
+	int nCmdType;			//=0 is a normal command (put up targeting pointer) =1 if it only targets the caster (charge up etc) =2 is a menu cmd
+	int nWaitTime;			//the amount of wait for this command, -1 is instant
+					//units are battle cycles (each time the chars wait is increased
+					//so are the commands)
+	string sDescription;
+}
+
+BattleCommand BatCommands[MAX_COMMANDS];
+
+void InitCommands()
+{
+
+	BatCommands[0].sName = "Attack";
+	BatCommands[0].sFuncString = "AttackFunc";
+	BatCommands[0].nMpCost = 0;
+	BatCommands[0].nAggressive = 1;
+	BatCommands[0].nWaitTime = 0-1;
+
+	BatCommands[1].sName = "Magic";
+	BatCommands[1].sFuncString = "MagicFunc";
+	BatCommands[1].nMpCost = 0;	
+	BatCommands[1].nAggressive = 0;
+	BatCommands[1].nWaitTime = 0-1;
+	BatCommands[1].nCmdType = 2;
+
+	BatCommands[2].sName = "Fire";
+	BatCommands[2].sFuncString = "FireFunc";
+	BatCommands[2].nMpCost = 5;
+	BatCommands[2].nAggressive = 1;
+	BatCommands[2].nWaitTime = 15;
+	BatCommands[2].sDescription = "Causes damage";
+	
+	BatCommands[3].sName = "Heal";
+	BatCommands[3].sFuncString = "HealFunc";
+	BatCommands[3].nMpCost = 5;
+	BatCommands[3].nAggressive = 0;
+	BatCommands[3].nMenu = 1;
+	BatCommands[3].sMenuFunc = "HealMenuFunc";
+	BatCommands[3].nWaitTime = 10;
+	BatCommands[3].sDescription = "Heals HP";
+	
+	BatCommands[4].sName = "Inferno";
+	BatCommands[4].sFuncString = "InfernoFunc";
+	BatCommands[4].nMpCost = 40;
+	BatCommands[4].nAggressive = 1;
+	BatCommands[4].nWaitTime = 30;
+	BatCommands[4].sDescription = "Heavy damage";
+
+	BatCommands[5].sName = "Venom";
+	BatCommands[5].sFuncString = "VenomFunc";
+	BatCommands[5].nMpCost = 15;
+	BatCommands[5].nAggressive = 1;
+	BatCommands[5].nWaitTime = 15;
+	BatCommands[5].sDescription = "Causes venoming";
+
+	BatCommands[6].sName = "Weaken Armor";
+	BatCommands[6].sFuncString = "WeakenArmorFunc";
+	BatCommands[6].nMpCost = 25;
+	BatCommands[6].nAggressive = 1;
+	BatCommands[6].nWaitTime = 15;
+	BatCommands[6].sDescription = "Weakens targets armor";
+
+	BatCommands[7].sName = "Cure Venom";
+	BatCommands[7].sFuncString = "CureVenomFunc";
+	BatCommands[7].nMpCost = 10;
+	BatCommands[7].nAggressive = 0;
+	BatCommands[7].nWaitTime = 8;
+	BatCommands[7].sDescription = "Cures venoming";
+
+	BatCommands[8].sName = "Enhance Magic";
+	BatCommands[8].sFuncString = "EnhanceMagicFunc";
+	BatCommands[8].nMpCost = 30;
+	BatCommands[8].nAggressive = 0;
+	BatCommands[8].nWaitTime = 10;
+	BatCommands[8].sDescription = "Enhances magical power";
+
+	BatCommands[9].sName = "Charge Up";
+	BatCommands[9].sFuncString = "ChargeUpFunc";
+	BatCommands[9].nMpCost = 0;
+	BatCommands[9].nAggressive = 0;
+	BatCommands[9].nWaitTime = 10;
+	BatCommands[9].nCmdType = 1;
+	BatCommands[9].sDescription = "Enhances physical power";
+
+	BatCommands[10].sName = "Revive";
+	BatCommands[10].sFuncString = "ReviveFunc";
+	BatCommands[10].nMpCost = 30;
+	BatCommands[10].nAggressive = 0;
+	BatCommands[10].nMenu = 1;
+	BatCommands[10].sMenuFunc = "ReviveMenuFunc";
+	BatCommands[10].nWaitTime = 30;
+	BatCommands[10].sDescription = "Brings a character back to life";
+	
+	BatCommands[11].sName = "Recover Status";
+	BatCommands[11].sFuncString = "RecoverStatusFunc";
+	BatCommands[11].nMpCost = 0;
+	BatCommands[11].nAggressive = 0;
+	BatCommands[11].nWaitTime = 8;
+	BatCommands[11].nCmdType = 1;
+	BatCommands[11].sDescription = "Cures bad status";
+	
+	BatCommands[12].sName = "Item";
+	BatCommands[12].sFuncString = "ItemFunc";
+	BatCommands[12].nMpCost = 0;	
+	BatCommands[12].nAggressive = 0;
+	BatCommands[12].nWaitTime = 0-1;
+	BatCommands[12].nCmdType = 2;
+	
+	BatCommands[13].sName = "Skill";
+	BatCommands[13].sFuncString = "MagicFunc";
+	BatCommands[13].nMpCost = 0;	
+	BatCommands[13].nAggressive = 0;
+	BatCommands[13].nWaitTime = 0-1;
+	BatCommands[13].nCmdType = 2;
+	
+	BatCommands[14].sName = "Invisibility";
+	BatCommands[14].sFuncString = "InvisFunc";
+	BatCommands[14].nMpCost = 60;
+	BatCommands[14].nAggressive = 0;
+	BatCommands[14].nWaitTime = 40;
+	BatCommands[14].sDescription = "Take no damage from physical attacks";
+	
+	BatCommands[15].sName = "Animals";
+	BatCommands[15].sFuncString = "AnimalsFunc";
+	BatCommands[15].nMpCost = 0;
+	BatCommands[15].nAggressive = 0;
+	BatCommands[15].nWaitTime = 10;
+	BatCommands[15].nCmdType = 1;
+	BatCommands[15].sDescription = "Summons an animal to help";
+
+	BatCommands[16].sName = "Hide";
+	BatCommands[16].sFuncString = "HideFunc";
+	BatCommands[16].nMpCost = 0;
+	BatCommands[16].nAggressive = 0;
+	BatCommands[16].nWaitTime = 10;
+	BatCommands[16].nCmdType = 1;
+	BatCommands[16].sDescription = "Raises characters evade";
+
+	BatCommands[17].sName = "Ambush";
+	BatCommands[17].sFuncString = "AmbushFunc";
+	BatCommands[17].nMpCost = 0;
+	BatCommands[17].nAggressive = 1;
+	BatCommands[17].nWaitTime = 10;
+	BatCommands[17].sDescription = "Launches out of hiding causing heavy damage";
+	
+	BatCommands[18].sName = "Banish";
+	Batcommands[18].sFuncString = "BanishFunc";
+	BatCommands[18].nMpCost = 50;
+	BatCommands[18].nAggressive = 1;
+	BatCommands[18].nWaitTime = 30;
+	BatCommands[18].sDescription = "Banishes target to castle heck!";
+}
+
+void GainSpellExpMenu(int _attacker, int _spell)
+{
+	
+	BatChars[_attacker].nSpellExp[_spell] += Random(25, 100);
+	
+	//the exp needed to lvl a spell is based on x^3
+	while(BatChars[_attacker].nSpellExp[_spell] >= pow(BatChars[_attacker].nSpellLevel[_spell]+1, SKILL_LEVEL_FUNC))
+	{
+		PlaySound(nLevelUpSound, 100);
+		BatChars[_attacker].nSpellExp[_spell]-=pow(BatChars[_attacker].nSpellLevel[_spell]+1, SKILL_LEVEL_FUNC);
+		BatChars[_attacker].nSpellLevel[_spell]++;
+	}
+}
+
+//give them exp for the spell
+void GainSpellExp(int _attacker, int _spell)
+{
+	int lvlsgained = 0;
+	string plural;
+	
+	//monsters can't gain spell levels
+	if(_attacker < 3)
+	{
+		CheckDeath();
+		DrawScreen();
+		DoWait();
+		InBattleChars[_attacker].nSpellExp[_spell] += Random(25, 100);
+	
+		//the exp needed to lvl a spell is based on x^3
+		while(InBattleChars[_attacker].nSpellExp[_spell] >= pow(InBattleChars[_attacker].nSpellLevel[_spell]+1, SKILL_LEVEL_FUNC))
+		{
+			PlaySound(nLevelUpSound, 100);
+			InBattleChars[_attacker].nSpellExp[_spell]-=pow(InBattleChars[_attacker].nSpellLevel[_spell]+1, SKILL_LEVEL_FUNC);
+			InBattleChars[_attacker].nSpellLevel[_spell]++;
+			lvlsgained++;
+		}
+
+		if(lvlsgained > 0)
+		{
+			if(lvlsgained > 1)
+				plural = "s";
+				
+			SetText(InBattleChars[_attacker].sName + "'s " + BatCommands[nCommand].sName + " gained " + str(lvlsgained) + " level" + plural + "!", 1);
+			DrawScreen();
+			DoWait();
+		}
+	}
+}
+
+void GetSkill(int char, int skill, int level)
+{
+	int i=0;
+
+	//first check if they already have the skill
+	for(i=0;i<10;i++)
+	{
+		if(BatChars[char].nSpells[i] == skill)
+			return;
+	}
+	
+	//find the first open spot
+	for(i=0;i<10;i++)
+	{
+		if(BatChars[char].nSpells[i] < 0)
+		{
+			BatChars[char].nSpells[i] = skill;
+			BatChars[char].nSpellLevel[i] = level;
+			return;
+		}
+	}
+}
+
+void ItemFunc()
+{
+	int done;
+	int i;
+	int scroll; //for scrolling the box
+
+	nMagicPointerPos = 0;
+	scroll = 0;
+	//show a window on the rightish side of the screen
+	//showing all the spells and there respective level
+	//and wait for input and stuff
+	done=0;
+	unpress(1);
+	unpress(2);
+	while(!done)
+	{
+		DrawScreen();
+		
+		DrawMenu(nMagicWindowImg, 10, 170, "");
+		
+		//items
+		for(i=scroll;i<scroll+10;i++)
+		{
+			if(nItemIndex[i] >= 0 && nItemCount[i] > 0)
+			{
+				if(Items[nItemIndex[i]].nBattleUse)
+				{
+					PrintString(26, 178 + (8 * (i-scroll)), screen, nFont, Items[nItemIndex[i]].sName);
+					PrintString(240, 178 + (8 * (i-scroll)), screen, nFont, str(nItemCount[i]));
+				}
+				else
+				{
+					SuperPrintText(26, 178 + (8 * (i-scroll)), screen, nFont, Items[nItemIndex[i]].sName, 100, RGB(125, 125, 125));
+					SuperPrintText(240, 178 + (8 * (i-scroll)), screen, nFont, str(nItemCount[i]), 100, RGB(125, 125, 125));
+				}
+			}
+		}
+		
+		TBlit(18, 178 + (nMagicPointerPos * 8), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			nMagicPointerPos--;
+			
+			if(nMagicPointerPos < 0)
+			{
+				scroll--;
+				nMagicPointerPos = 0;
+				if(scroll < 0)
+				{
+					scroll=0;
+				}
+			}
+			
+			PlaySound(nMenuMoveSound, 100);
+			
+			Unpress(5);
+		}
+		else if(down)
+		{
+			nMagicPointerPos++;
+			
+			if(nMagicPointerPos > BATTLE_ITEM_MENU_SIZE)
+			{
+				nMagicPointerPos = BATTLE_ITEM_MENU_SIZE;
+				scroll++;
+				if(scroll > MAX_ITEMS-BATTLE_ITEM_MENU_SIZE)
+				{
+					scroll = MAX_ITEMS-BATTLE_ITEM_MENU_SIZE;
+				}
+			}
+			
+			PlaySound(nMenuMoveSound, 100);
+				
+			Unpress(6);
+		}
+		else if(b1)
+		{
+			if(nItemIndex[nMagicPointerPos+scroll] >= 0 && nItemCount[nMagicPointerPos+scroll] > 0)
+			{
+				if(Items[nItemIndex[nMagicPointerPos+scroll]].nBattleUse)
+				{
+					done = 1;
+					PlaySound(nMenuClickSound, 100);
+				}
+				else
+				{
+					PlaySound(nErrorSound, 100);
+				}
+			}
+			else
+			{
+				PlaySound(nErrorSound, 100);
+			}
+			Unpress(1);
+		}
+		else if(b2)
+		{
+			nMagicPointerPos = 0;
+			nMagicPointerPos--;
+			
+			done = 1;
+			Unpress(2);
+		}		
+	}
+	
+	//use the item
+	if(nMagicPointerPos >= 0)
+	{
+		nItem = nItemIndex[nMagicPointerPos + scroll];
+		nPointerOn = 0;
+		CallFunction(Items[nItem].sBattleFuncString);
+		
+		if(target >= 0)
+		{
+			InBattleChars[nTurn].nWait = 0;
+			nPointerOn = 1;
+			CheckDeath();
+		}
+	}
+	else
+	{
+		target = 0;
+		target--;
+	}
+}
+
+void MagicFunc()
+{
+	int again;
+	int done;
+	int i;
+
+	nMagicPointerPos = 0;
+	
+	//show a window on the rightish side of the screen
+	//showing all the spells and there respective level
+	//and wait for input and stuff
+	done=0;
+	unpress(1);
+	unpress(2);
+	while(!done)
+	{
+		DrawScreen();
+		
+		DrawMenu(nMagicWindowImg, 10, 170, "");
+		//spell box
+		//Rect(75, 400, 700, 550, RGB(255,255,255), screen);
+
+		//transparent background thingy
+		//RectFill(76, 401, 699, 549, RGB(53, 64, 164), screen);
+		
+		//spells
+		for(i=0;InBattleChars[attacker].nSpells[i] >= 0;i++)
+		{
+			//if the spell costs to much gray it out
+			if(BatCommands[InBattleChars[attacker].nSpells[i]].nMpCost > InBattleChars[attacker].nMp)
+			{
+				SuperPrintText(26, 178 + (i * 8), screen, nFont, BatCommands[InBattleChars[attacker].nSpells[i]].sName, 100, RGB(125, 125, 125));
+				//don't print the mp if the command dosen't take any
+				if(BatCommands[InBattleChars[attacker].nSpells[i]].nMpCost > 0)
+					SuperPrintText(170, 178 + (i * 8), screen, nFont, str(BatCommands[InBattleChars[attacker].nSpells[i]].nMpCost) + "mp", 100, RGB(125, 125, 125));
+				SuperPrintText(270, 178 + (i * 8), screen, nFont, str(InBattleChars[attacker].nSpellLevel[i]) + "%", 100, RGB(125, 125, 125));
+			}
+			else
+			{
+				PrintString(26, 178 + (i * 8), screen, nFont, BatCommands[InBattleChars[attacker].nSpells[i]].sName);
+				//don't print the mp if the command dosen't take any
+				if(BatCommands[InBattleChars[attacker].nSpells[i]].nMpCost > 0)
+					PrintString(170, 178 + (i * 8), screen, nFont, str(BatCommands[InBattleChars[attacker].nSpells[i]].nMpCost) + "mp");
+				PrintString(270, 178 + (i * 8), screen, nFont, str(InBattleChars[attacker].nSpellLevel[i]) + "%");
+			}
+		}
+		
+		TBlit(18, 178 + (nMagicPointerPos * 8), nPointer, screen);
+		
+		ShowPage();
+		
+		if(up)
+		{
+			nMagicPointerPos--;
+			
+			if(nMagicPointerPos < 0)
+				nMagicPointerPos = 0;
+			
+			PlaySound(nMenuMoveSound, 100);
+			
+			Unpress(5);
+		}
+		else if(down)
+		{
+			nMagicPointerPos++;
+			
+			if(InBattleChars[attacker].nSpells[nMagicPointerPos] < 0)
+				nMagicPointerPos--;
+			
+			PlaySound(nMenuMoveSound, 100);
+			
+			Unpress(6);
+		}
+		else if(b1)
+		{
+			done = 1;
+			PlaySound(nMenuClickSound, 100);
+			Unpress(1);
+		}
+		else if(b2)
+		{
+			nMagicPointerPos = 0;
+			nMagicPointerPos--;
+			
+			done = 1;
+			Unpress(2);
+		}
+	}
+	
+	//call the spell
+
+	if(nMagicPointerPos >= 0)
+	{
+		//it's an instant, so cast it now
+		if(BatCommands[InBattleChars[attacker].nSpells[nMagicPointerPos]].nWaitTime < 0)
+		{
+			again=0;
+			while(again==0)
+			{
+				if(BatCommands[InBattleChars[attacker].nSpells[nMagicPointerPos]].nCmdType == 0)
+				{
+					nCommand = InBattleChars[attacker].nSpells[nMagicPointerPos];
+					ChooseTarget();
+				}
+				else if(BatCommands[InBattleChars[attacker].nSpells[nMagicPointerPos]].nCmdType == 1)
+				{
+					target = nTurn;
+				}
+
+				//if they hit cancel, go back and do it again
+				if(target < 0)
+				{
+					again = 1;
+					nPointerOn = 1;
+				}
+				else
+				{
+					nSpell = nMagicPointerPos;
+					nCommand = InBattleChars[attacker].nSpells[nMagicPointerPos];
+					CallFunction(BatCommands[nCommand].sFuncString);
+					CheckDeath();
+				}
+			}
+
+			//nSpell = nMagicPointerPos;
+			//nCommand = InBattleChars[attacker].nSpells[nMagicPointerPos];
+
+			//nPointerOn = 0;
+			//CallFunction(BatCommands[nCommand].sFuncString);
+			//nPointerOn = 1;
+
+			//CheckDeath();
+		}
+		else
+		{
+			//if the spell needs a target, choose it here
+			again=0;
+			while(again==0)
+			{
+				if(BatCommands[InBattleChars[attacker].nSpells[nMagicPointerPos]].nCmdType == 0)
+				{
+					nCommand = InBattleChars[attacker].nSpells[nMagicPointerPos];
+					ChooseTarget();
+				}
+				else if(BatCommands[InBattleChars[attacker].nSpells[nMagicPointerPos]].nCmdType == 1)
+				{
+					target = nTurn;
+				}
+				//if they hit cancel, go back and do it again
+				if(target < 0)
+				{
+					again = 1;
+					nPointerOn = 1;
+				}
+				else
+				{
+					//charge the skill....spell....WHATEVER
+					InBattleChars[attacker].nCurCommand = InBattleChars[attacker].nSpells[nMagicPointerPos];
+					InBattleChars[attacker].nCommandIndex = nMagicPointerPos;
+					InBattleChars[attacker].nCommandTarget = target;
+					again = 1;
+				}
+			}
+		}
+	}
+	else
+	{
+		target = 0;
+		target--;
+	}
+}
+
+void AttackFunc()
+{
+	int x;
+	int y;
+	
+	string text;
+
+	int basedamage;
+	int finaldamage;
+	int tohit;
+	
+	//you can't hit something you can't see
+	if(!HasStatus(target, 4))
+	{
+		//calculate if they hit or not
+		tohit = inBattleChars[attacker].nHit - inBattleChars[target].nEvade;
+		
+		//if there hiding, give them a big evade bonus
+		if(HasStatus(target, 5))
+		{
+			tohit -= 75; //MUAHAHAHA YOU CAN'T TOUCH ME!
+		}
+		
+		if(Random(1, 100) < tohit) 
+		{
+			if(HasStatus(target, 5))
+			{
+				//got through the hide, so take off the hide
+				RemoveStatus(target, 5);
+				text = InBattleChars[target].sName + " is forced out of hiding!";
+			}
+			
+			PlaySound(nAttackSound, 100);
+		
+			//calculate the center X and Y
+			BattleAnimXY(target, nAttackAnim);
+			x = nCenterX;
+			y = nCenterY;
+			
+			//animate me!
+			PlayAnim(x, y, nAttackAnim, 3, screen, 15);
+		
+	
+			//they hit, now calculate damage
+			basedamage = inBattleChars[attacker].nAttackPow - inBattleChars[target].nDefense; 
+		
+			if(basedamage < 0)
+				finaldamage = 0;
+			else
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+
+			inBattleChars[target].nHp = inBattleChars[target].nHp - finaldamage;
+			
+			ShowActionText(str(finaldamage), target, RGB(255, 0, 0));
+		}
+		else
+		{
+			//miss
+			PlaySound(nMissSound, 100);
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+	else
+	{
+		
+		PlaySound(nMissSound, 100);
+		ShowActionText("Miss", target, RGB(255, 0, 0));
+	}
+	
+	SetText(text, 0);
+}
+
+void WeakenArmorFunc()
+{
+	int x;
+	int y;
+	int tohit;
+	
+	string text;
+	
+	SetText("Weaken Armor", 0);
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else
+	{
+		//play the sound
+		PlaySound(nWeakSound, 100);
+			
+		BattleAnimXY(target, nFireAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen yellow
+		TintOn(RGB(255, 255, 0), 70);
+	
+		//animate me!
+		PlayAnim(x, y, nFireAnim, 3, screen, 15);
+		
+		//turn off the tint
+		TintOff();
+	
+		//calculate damage
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			
+		AddStatus(target, 1, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+			
+		ShowActionText("Weak Armor", target, RGB(0, 0, 255));
+			
+		GainSpellExp(attacker, nSpell);
+	}	
+}
+
+void AmbushFunc()
+{
+	int x;
+	int y;
+	int tohit;
+	
+	int basedamage;
+	int finaldamage;
+	
+	BattleAnimXY(target, nAttackAnim);
+	x = nCenterX;
+	y = nCenterY;
+
+	SetText("Ambush", 0);
+	
+	if(HasStatus(attacker, 5))
+	{
+		//calculate if they hit or not
+		tohit = inBattleChars[attacker].nHit/2 + InBattleChars[attacker].nSpellLevel[nSpell]/2;
+		if(Random(1, 100) < tohit)
+		{
+			basedamage = inBattleChars[attacker].nAttackPow - inBattleChars[target].nDefense; 
+			basedamage = basedamage*5;
+		
+			if(basedamage < 0)
+				finaldamage = 0;
+			else
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+				
+			TintOn(RGB(255, 255, 255), 70);
+			DrawScreen();
+			Wait(5);
+			TintOff();
+			
+			//animate me!
+			PlayAnim(x, y, nAttackAnim, 3, screen, 15);
+
+			InBattleChars[target].nHp -= finaldamage;
+			ShowActionText(str(finaldamage), target, RGB(255, 0, 0));
+			GainSpellExp(attacker, nSpell);
+		}
+		else
+		{
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+		
+		//Remove the hide status
+		RemoveStatus(attacker, 5);
+	}
+	else
+	{
+		//not hidden, so just normal attack
+		AttackFunc();
+	}
+}
+
+void HideFunc()
+{
+	int x;
+	int y;
+	int tohit;
+	
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Hide", 0);
+	//calculate if they hit or not
+	tohit = inBattleChars[attacker].nHit/2 + InBattleChars[attacker].nSpellLevel[nSpell]/2;
+	if(Random(1, 100) < tohit)
+	{
+		AddStatus(attacker, 5, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 2);
+		ShowActionText("Hide", target, RGB(0, 0, 255));
+		GainSpellExp(attacker, nSpell);
+	}
+	else
+	{
+		ShowActionText("Miss", target, RGB(255, 0, 0));
+	}
+}
+
+void BanishFunc()
+{	
+	int x;
+	int y;
+	int tohit;
+	int diamater;
+	
+	string text;
+	int damage;
+	
+	SetText("Banish", 0);
+	DrawScreen();
+	
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		text = InBattleChars[attacker].sName + " does not have enough mp!";
+	}
+	else
+	{
+		FindCenter(target, 50, 50);
+		//x and y +25 because the circle drawing func draws around that point
+		x = nCenterX+25;
+		y = nCenterY+25;
+
+		//first check to see if you can cast this spell on them
+		if(InBattleChars[target].nCanBeBanished)
+		{
+			//check if the target gets banished to castle heck
+			if(Random(1, 100) < InBattleChars[attacker].nSpellLevel[nSpell])
+			{
+				//play the sound
+				PlaySound(nBanishSound, 100);
+
+				for(diamater=0;diamater<50;diamater+=2)
+				{
+					CircleFill(x, y, diamater, diamater, RGB(diamater*2, 0, diamater*2), screen);
+					ShowPage();
+					Wait(1);
+				}
+
+				InBattleChars[target].nHp = 0;
+
+				ShowActionText("Dead", target, RGB(255, 0, 0));
+
+				GainSpellExp(attacker, nSpell);
+
+				inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;			
+			}
+			else
+			{
+				//calculate if they hit or not
+				tohit = inBattleChars[attacker].nMagicHit + InBattleChars[attacker].nSpellLevel[nSpell]/2;
+				if(Random(1, 100) < tohit)
+				{
+					//play the sound
+					PlaySound(nBanishSound, 100);
+
+					for(diamater=0;diamater<50;diamater+=2)
+					{
+						CircleFill(x, y, diamater, diamater, RGB(diamater*2, 0, diamater*2), screen);
+						ShowPage();
+						Wait(1);
+					}
+
+					damage = InBattleChars[target].nHp/2;
+
+					InBattleChars[target].nHp-=damage;
+
+					inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+
+					ShowActionText(str(damage), target, RGB(255, 0, 0));
+
+					GainSpellExp(attacker, nSpell);
+				}
+				else
+				{
+					PlaySound(nSpellMissSound, 100);
+					//enemies don't take damage, but still costs mp
+					inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+					ShowActionText("Miss", target, RGB(255, 0, 0));
+				}
+			}
+		}
+		else
+		{
+			PlaySound(nSpellMissSound, 100);
+			//enemies don't take damage, but still costs mp
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+	
+	SetText(text, 0);
+}
+
+void InvisFunc()
+{
+	int x;
+	int y;
+	int tohit;
+	
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Invisibility", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else
+	{
+		//play the sound
+		PlaySound(nVenomSound, 100);
+		
+		BattleAnimXY(target, nVenomAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen sickly green
+		TintOn(RGB(0, 60, 0), 70);
+
+		//animate me!
+		PlayAnim(x, y, nVenomAnim, 3, screen, 15);
+			
+		//turn off the tint
+		TintOff();
+
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		
+		AddStatus(target, 4, 0, (InBattleChars[attacker].nMagicPow/10)+(InBattleChars[attacker].nSpellLevel[nSpell]/5));
+			
+		ShowActionText("Invisible", target, RGB(0, 0, 255));
+			
+		GainSpellExp(attacker, nSpell);
+	}
+	
+}
+
+void VenomFunc()
+{
+	int x;
+	int y;
+	int tohit;
+	
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Venom", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		text = InBattleChars[attacker].sName + " does not have enough mp!";
+	}
+	else
+	{
+		//calculate if they hit or not
+		tohit = inBattleChars[attacker].nMagicHit - inBattleChars[target].nMagicEvade;
+		if(Random(1, 100) < tohit)
+		{
+			//play the sound
+			PlaySound(nVenomSound, 100);
+		
+			BattleAnimXY(target, nVenomAnim);
+			x = nCenterX;
+			y = nCenterY;
+
+			//tint the screen sickly green
+			TintOn(RGB(0, 60, 0), 70);
+
+			//animate me!
+			PlayAnim(x, y, nVenomAnim, 3, screen, 15);
+			
+			//turn off the tint
+			TintOff();
+
+			//calculate damage
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		
+			AddStatus(target, 0, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+			
+			ShowActionText("Venom", target, RGB(255, 0, 0));
+			
+			GainSpellExp(attacker, nSpell);
+		}
+		else
+		{
+			PlaySound(nSpellMissSound, 100);
+			//enemies don't take damage, but still costs mp
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+	
+	SetText(text, 0);
+}
+
+void EnhanceMagicFunc()
+{
+	int tohit;
+	int negone = 0;
+	negone--;
+	
+	int x,y;
+	string text;
+	
+	SetText("Enhance Magic", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else
+	{
+		PlaySound(nHealSound, 100);
+		BattleAnimXY(target, nHealAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen green
+		TintOn(RGB(255, 255, 255), 70);
+	
+		//animate me!
+		PlayAnim(x, y, nHealAnim, 4, screen, 15);
+		
+		//turn off the tint
+		TintOff();
+
+		AddStatus(target, 2, (InBattleChars[attacker].nMagicPow/8)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+	
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		
+		ShowActionText("Enhance Magic", target, RGB(0, 0, 255));
+			
+		GainSpellExp(attacker, nSpell);
+	}
+}
+
+void ChargeUpFunc()
+{
+	int tohit;
+	int negone = 0;
+	negone--;
+	
+	int x,y;
+	string text;
+	
+	SetText("Charge Up", 0);
+	PlaySound(nChargeSound, 100);
+
+	BattleAnimXY(target, nChargeAnim);
+	x = nCenterX;
+	y = nCenterY;
+
+	//tint the screen white
+	//TintOn(RGB(255, 255, 255), 70);
+
+	//animate me!
+	PlayAnim(x, y, nChargeAnim, 6, screen, 7);
+			
+	//turn off the tint
+	//TintOff();
+
+	AddStatus(target, 3, (InBattleChars[attacker].nMagicPow/8)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+	
+	ShowActionText("Charge Up", target, RGB(0, 0, 255));
+			
+	GainSpellExp(attacker, nSpell);
+}
+
+void CureVenomFunc()
+{
+	int tohit;
+	int negone = 0-1;
+	int x,y;
+	string text;
+	
+	SetText("Cure Venom", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else
+	{
+		if(!InBattleChars[target].nDead)
+		{
+			PlaySound(nHealSound, 100);
+
+			BattleAnimXY(target, nHealAnim);
+			x = nCenterX;
+			y = nCenterY;
+
+			//tint the screen white
+			TintOn(RGB(255, 255, 255), 70);
+		
+			//animate me!
+			PlayAnim(x, y, nHealAnim, 4, screen, 15);
+			
+			//turn off the tint
+			TintOff();
+
+			RemoveStatus(target, 0);
+	
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			
+			ShowActionText("Venom Cured", target, RGB(0, 0, 255));
+			
+			GainSpellExp(attacker, nSpell);
+		}
+		else
+		{
+			//miss
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+}
+
+void ReviveMenuFunc()
+{
+	int basedamage;
+	int finaldamage;
+	
+	if(BatChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		PlaySound(nErrorSound, 100);
+		return;
+	}
+	else if(!BatChars[target].nDead)
+	{
+		PlaySound(nErrorSound, 100);
+		return;
+	}
+	else
+	{
+		//revived with %hp equal to the casting level
+		basedamage = ((BatChars[target].nMaxHp * 100) * (BatChars[attacker].nSpellLevel[nSpell]/10))/1000;
+			
+		BatChars[target].nHp = basedamage;
+		BatChars[target].nDead = 0;
+	
+
+		if(BatChars[target].nHp > BatChars[target].nMaxHp)
+			BatChars[target].nHp = BatChars[target].nMaxHp;
+		
+		BatChars[attacker].nMp = BatChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		
+		GainSpellExpMenu(attacker, nSpell);
+	}
+}
+
+void ReviveFunc()
+{
+	int tohit;
+	int x,y;
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Revive", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else if(!InBattleChars[target].nDead)
+	{
+		//miss
+		ShowActionText("Miss", target, RGB(255, 0, 0));
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+	}
+	else
+	{
+		PlaySound(nHealSound, 100);
+			
+		BattleAnimXY(target, nHealAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen green
+		TintOn(RGB(0, 255, 0), 70);
+	
+		//animate me!
+		PlayAnim(x, y, nHealAnim, 4, screen, 15);
+			
+		//turn off the tint
+		TintOff();
+
+	
+		//revived with %hp equal to the casting level
+		basedamage = ((inBattleChars[target].nMaxHp * 100) * (InBattleChars[attacker].nSpellLevel[nSpell]/10))/1000;
+			
+		inBattleChars[target].nHp = basedamage;
+		inbattleChars[target].nDead = 0;
+	
+	
+		if(inBattleChars[target].nHp > inBattleChars[target].nMaxHp)
+			inBattleChars[target].nHp = inBattleChars[target].nMaxHp;
+		
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			
+		ShowActionText(str(basedamage), target, RGB(255, 0, 0));
+		
+		GainSpellExp(attacker, nSpell);
+	}
+}
+
+void RecoverStatusFunc()
+{
+	int tohit;
+	int x,y;
+	string text;
+	int negtwo=0;
+	negtwo--;
+	negtwo--;
+	int tohit;
+	
+	SetText("Recover Status", 0);
+	
+	if(!InBattleChars[target].nDead)
+	{
+		if(HasStatus(target, negtwo))
+		{
+			tohit = InBattleChars[attacker].nSpellLevel[nSpell];
+			if(Random(0, 100) < tohit)
+			{
+		
+				PlaySound(nHealSound, 100);
+
+				BattleAnimXY(target, nHealAnim);
+				x = nCenterX;
+				y = nCenterY;
+
+				//tint the screen green
+				TintOn(RGB(0, 255, 0), 70);
+
+				//animate me!
+				PlayAnim(x, y, nHealAnim, 4, screen, 15);
+			
+				//turn off the tint
+				TintOff();
+
+				RemoveStatus(target, negtwo);
+
+				ShowActionText("Status Removed", target, RGB(0, 0, 255));
+		
+				GainSpellExp(attacker, nSpell);
+			}
+			else
+			{
+				//miss
+				ShowActionText("Miss", target, RGB(255, 0, 0));
+			}
+		}
+		else
+		{
+			//miss
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+	else
+	{
+		//miss
+		ShowActionText("Miss", target, RGB(255, 0, 0));
+	}
+	
+	SetText(text, 0);
+}
+
+void HealMenuFunc()
+{
+	int basedamage;
+	int finaldamage;
+	
+	
+	if(BatChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		PlaySound(nErrorSound, 100);
+		return;
+	}
+	else if(BatChars[target].nDead)
+	{
+		PlaySound(nErrorSound, 100);
+		return;
+	}
+	else if(BatChars[target].nHp >= BatChars[target].nMaxHp)
+	{
+		PlaySound(nErrorSound, 100);
+		return;
+	}
+	else
+	{
+		PlaySound(nHealSound, 100);
+		//calculate hp gain
+		basedamage = (BatChars[attacker].nInt/3) * (BatChars[attacker].nSpellLevel[nSpell]/5);
+			
+		if(basedamage < 0)
+			finaldamage = 0;
+		else
+			finaldamage = Random(basedamage, basedamage+(basedamage/2));
+			
+		BatChars[target].nHp = BatChars[target].nHp + finaldamage;
+	
+	
+		if(BatChars[target].nHp > BatChars[target].nMaxHp)
+			BatChars[target].nHp = BatChars[target].nMaxHp;
+		
+		BatChars[attacker].nMp = BatChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		GainSpellExpMenu(attacker, nSpell);
+	}
+}
+
+void HealFunc()
+{
+	int tohit;
+	int x,y;
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Heal", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		SetText(InBattleChars[attacker].sName + " does not have enough mp!", 0);
+	}
+	else if(InBattleChars[target].nDead)
+	{
+		PlaySound(nSpellMissSound, 100);
+	}
+	else
+	{
+		PlaySound(nHealSound, 100);
+			
+		BattleAnimXY(target, nHealAnim);
+		x = nCenterX;
+		y = nCenterY;
+
+		//tint the screen green
+		TintOn(RGB(0, 255, 0), 70);
+	
+		//animate me!
+		PlayAnim(x, y, nHealAnim, 4, screen, 15);
+			
+		//turn off the tint
+		TintOff();
+
+		//calculate hp gain
+			basedamage = (inBattleChars[attacker].nMagicPow/3) * (InBattleChars[attacker].nSpellLevel[nSpell]/5);
+		
+		if(basedamage < 0)
+			finaldamage = 0;
+		else
+			finaldamage = Random(basedamage, basedamage+(basedamage/2));
+			
+		inBattleChars[target].nHp = inBattleChars[target].nHp + finaldamage;
+	
+	
+		if(inBattleChars[target].nHp > inBattleChars[target].nMaxHp)
+			inBattleChars[target].nHp = inBattleChars[target].nMaxHp;
+		
+		inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+		ShowActionText(str(finaldamage), target, RGB(0, 255, 0));
+		
+		GainSpellExp(attacker, nSpell);
+	}
+}
+
+void InfernoFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	SetText("Inferno", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		text = InBattleChars[attacker].sName + " does not have enough mp!";
+	}
+	else
+	{
+		//calculate if they hit or not
+		tohit = inBattleChars[attacker].nMagicHit - inBattleChars[target].nMagicEvade;
+		if(Random(1, 100) < tohit)
+		{
+			//play the sound
+			PlaySound(nFireSound, 100);
+		
+			BattleAnimXY(target, nFireAnim);
+			x = nCenterX;
+			y = nCenterY;
+
+			//tint the screen red
+			TintOn(RGB(255, 0, 0), 70);
+	
+			//animate me!
+			PlayAnim(x, y, nFireAnim, 3, screen, 15);
+		
+			//turn off the tint
+			TintOff();
+
+			//calculate damage
+			basedamage = ((inBattleChars[attacker].nMagicPow) * (InBattleChars[attacker].nSpellLevel[nSpell]/5)) - inBattleChars[target].nMagicDef;
+		
+			if(basedamage < 0)
+				finaldamage = 0;
+			else
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+				
+			finaldamage = finaldamage * 2;
+
+			
+			inBattleChars[target].nHp = inBattleChars[target].nHp - finaldamage;
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText(str(finaldamage), target, RGB(255, 0, 0));
+		}
+		else
+		{
+			PlaySound(nSpellMissSound, 100);
+			//enemies don't take damage, but still costs mp
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+		
+	SetText(text, 0);
+	GainSpellExp(attacker, nSpell);
+}
+
+void AnimalsFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	int basedamage;
+	int finaldamage;
+	int summon;
+	
+	//calculate if they hit or not
+	tohit = inBattleChars[attacker].nMagicHit/2 + InBattleChars[attacker].nSpellLevel[nSpell]/2;
+	if(Random(1, 100) < tohit)
+	{
+		summon=Random(0, 2);
+		
+		if(summon == 0)
+		{
+			//blackbear
+			SetText("Black Bear", 0);
+			//choose a random target and do 2X damage to it
+			target = Random(3, 5);
+			while(InBattleChars[target].nDead == 1)
+			{
+				target = Random(3, 5);
+			}
+			
+			BattleAnimXY(target, nAttackAnim);
+			x = nCenterX;
+			y = nCenterY;
+
+			TintOn(RGB(255, 0, 0), 70);
+			PlayAnim(x, y, nAttackAnim, 3, screen, 15);
+			TintOff();
+			
+			basedamage = inBattleChars[attacker].nAttackPow - inBattleChars[target].nDefense;
+			basedamage = basedamage*2;
+
+			if(basedamage < 0)
+				finaldamage = 0;
+			else
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+				
+			inBattleChars[target].nHp = inBattleChars[target].nHp - finaldamage;
+			
+			ShowActionText(str(finaldamage), target, RGB(255, 0, 0));
+		}
+		else if(summon == 1)
+		{
+			//forest sprite
+			SetText("Forest Sprite", 0);
+			
+			//tint the screen yellow
+			TintOn(RGB(255, 255, 0), 70);
+			
+			DrawScreen();
+			Wait(50);
+				
+			//turn off the tint
+			TintOff();
+			
+			basedamage = inBattleChars[attacker].nMagicPow;
+			
+			if(nPlayers[0] >= 0)
+			{
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));			
+
+				if(InBattleChars[0].nDead != 1)
+				{
+					InBattleChars[0].nHp += finaldamage;
+					if(InBattleChars[0].nHp > InBattleChars[0].nMaxHp)
+						InBattleChars[0].nHp = InBattleChars[0].nMaxHp;
+						
+					ShowActionText(str(finaldamage), 0, RGB(0, 255, 0));
+				}
+			}
+			
+			if(nPlayers[1] >= 0)
+			{
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+				
+				if(InBattleChars[1].nDead != 1)
+				{
+					InBattleChars[1].nHp += finaldamage;
+					if(InBattleChars[1].nHp > InBattleChars[1].nMaxHp)
+						InBattleChars[1].nHp = InBattleChars[1].nMaxHp;
+						
+					ShowActionText(str(finaldamage), 1, RGB(0, 255, 0));
+				}
+			}
+
+			if(nPlayers[2] >= 0)
+			{
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+				
+				if(InBattleChars[2].nDead != 1)
+				{
+					InBattleChars[2].nHp += finaldamage;
+					if(InBattleChars[2].nHp > InBattleChars[2].nMaxHp)
+						InBattleChars[2].nHp = InBattleChars[2].nMaxHp;
+						
+					ShowActionText(str(finaldamage), 2, RGB(0, 255, 0));
+				}
+			}
+		}
+		else if(summon == 2)
+		{
+			//skunk
+			SetText("Skunk", 0);
+			
+			//tint the screen green
+			TintOn(RGB(0, 255, 0), 70);
+			
+			DrawScreen();
+			Wait(50);
+				
+			//turn off the tint
+			TintOff();
+			
+			if(nMonsters[0] >= 0)
+			{
+				if(InbattleChars[3].nDead != 1)
+				{
+					AddStatus(3, 0, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+					ShowActionText("Venom", 3, RGB(255, 0, 0));
+				}
+			}
+
+			if(nMonsters[1] >= 0)
+			{
+				if(InbattleChars[4].nDead != 1)
+				{
+					AddStatus(4, 0, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+					ShowActionText("Venom", 4, RGB(255, 0, 0));
+				}
+			}
+
+			if(nMonsters[2] >= 0)
+			{
+				if(InbattleChars[5].nDead != 1)
+				{
+					AddStatus(5, 0, (InBattleChars[attacker].nMagicPow/4)+(InBattleChars[attacker].nSpellLevel[nSpell]/2), 5);
+					ShowActionText("Venom", 5, RGB(255, 0, 0));
+				}
+			}
+		}
+		
+		GainSpellExp(attacker, nSpell);
+	}	
+	else	
+	{
+		PlaySound(nSpellMissSound, 100);
+		SetText("Basset Hound", 0);
+	}
+}
+
+void FireFunc()
+{
+	int tohit;
+	int x;
+	int y;
+	
+	string text;
+	int basedamage;
+	int finaldamage;
+	
+	int rnd;
+	
+	SetText("Fire", 0);
+	
+	if(InBattleChars[attacker].nMp < BatCommands[nCommand].nMpCost)
+	{
+		text = InBattleChars[attacker].sName + " does not have enough mp!";
+	}
+	else
+	{
+		//calculate if they hit or not
+		tohit = inBattleChars[attacker].nMagicHit - inBattleChars[target].nMagicEvade;
+		if(Random(1, 100) < tohit)
+		{
+			//play the sound
+			PlaySound(nFireSound, 100);
+		
+			BattleAnimXY(target, nFireAnim);
+			x = nCenterX;
+			y = nCenterY;
+	
+			//tint the screen red
+			TintOn(RGB(255, 0, 0), 70);
+	
+			//animate me!
+			PlayAnim(x, y, nFireAnim, 3, screen, 15);
+		
+			//turn off the tint
+			TintOff();
+
+			//calculate damage
+			basedamage = ((inBattleChars[attacker].nMagicPow/2) * (InBattleChars[attacker].nSpellLevel[nSpell]/5)) - inBattleChars[target].nMagicDef;
+			
+			if(basedamage < 0)
+				finaldamage = 0;
+			else
+				finaldamage = Random(basedamage, basedamage+(basedamage/2));
+	
+		
+			inBattleChars[target].nHp = inBattleChars[target].nHp - finaldamage;
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText(str(finaldamage), target, RGB(255, 0, 0));
+		}	
+		else	
+		{
+			PlaySound(nSpellMissSound, 100);
+			//enemies don't take damage, but still costs mp
+			inBattleChars[attacker].nMp = inBattleChars[attacker].nMp - BatCommands[nCommand].nMpCost;
+			ShowActionText("Miss", target, RGB(255, 0, 0));
+		}
+	}
+	
+	SetText(text, 0);
+	GainSpellExp(attacker, nSpell);
+}

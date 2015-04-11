@@ -1,0 +1,166 @@
+void Splash()
+{
+	int SplashFont = LoadFont("fred.png");
+		
+	//comment the next line if the font isn't variable width, or your using the builtin font
+	EnableVariableWidth(SplashFont);
+
+	int count=0;
+	int flipflop = 0;
+	int offset;
+	int v3splash;
+	
+	int width=ImageWidth(screen);
+	int height=ImageHeight(screen);
+	
+	string prompt = "c:\> ";
+
+	string dir = "cd \verge";
+	string cursor;
+	
+	timer=0;
+	
+	//show c prompt with blinking cursor
+
+	while(count < 40)
+	{
+		RectFill(0, 0, width, height, RGB(0, 0, 0), screen);
+		
+		if(flipflop == 0)
+		{
+			PrintString(10, ((height*100)*90)/10000, screen, SplashFont, "c:\> _");
+		}
+		else
+		{
+			PrintString(10, ((height*100)*90)/10000, screen, SplashFont, "c:\> ");
+		}
+		
+		count++;
+		
+		//logic to determine when to turn off cursor
+		if(count % 20 == 0)
+		{
+			if(flipflop == 0)
+			{
+				flipflop = 1;
+			}
+			else
+			{
+				flipflop = 0;
+			}
+		}
+		
+		ShowPage();
+	}
+	
+	//type out 'cd \verge'
+	count = 0;
+
+	offset = 0;
+	while(count < 50)
+	{
+		RectFill(0, 0, width, height, RGB(0, 0, 0), screen);
+		
+		if(flipflop == 0)
+		{
+			cursor = "_";
+		}
+		else
+		{
+			cursor = " ";
+		}
+		
+		PrintString(10, ((height*100)*90)/10000, screen, SplashFont, prompt + left(dir, offset) + cursor);
+		
+		count++;
+		
+		//logic to determine when to turn off cursor
+		if(count % 20 == 0)
+		{
+			if(flipflop == 0)
+			{
+				flipflop = 1;
+			}
+			else
+			{
+				flipflop = 0;
+			}
+		}
+		
+		//logic to determine when to show next char
+		if(count % 3 == 0)
+		{
+			offset++;
+		}
+		
+		ShowPage();
+	}
+	
+	//go to new dir
+	count = 0;
+
+	offset = 0;
+	prompt = "c:\verge\> ";
+	dir = "verge.exe";
+	while(count < 60)
+	{
+		RectFill(0, 0, width, height, RGB(0, 0, 0), screen);
+		
+		if(flipflop == 0)
+		{
+			cursor = "_";
+		}
+		else
+		{
+			cursor = " ";
+		}
+		
+		//print previous line
+		PrintString(10, (((height*100)*90)/10000)-FontHeight(SplashFont), screen, SplashFont, "c:\> cd \verge");
+		//print new line
+		PrintString(10, ((height*100)*90)/10000, screen, SplashFont, prompt + left(dir, offset) + cursor);
+		
+		count++;
+		
+		//logic to determine when to turn off cursor
+		if(count % 40 == 0)
+		{
+			if(flipflop == 0)
+			{
+				flipflop = 1;
+			}
+			else
+			{
+				flipflop = 0;
+			}
+		}
+		
+		//logic to determine when to show next char
+		if(count % 3 == 0)
+		{
+			offset++;
+		}
+		
+		ShowPage();
+	}
+	
+	v3splash = LoadImage("vsplash.png");
+
+	//fade in powered by image
+
+	FadeInImgCenter(50, v3splash);
+	
+	timer = 0;
+	while(timer < 100)
+	{
+		ShowPage();
+	}
+	
+	FadeOutImg(50);
+	
+
+	if(SplashFont != 0)
+		FreeFont(SplashFont);
+		
+	FreeImage(v3splash);
+}

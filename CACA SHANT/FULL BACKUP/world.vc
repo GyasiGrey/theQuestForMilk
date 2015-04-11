@@ -1,0 +1,104 @@
+void start()
+{
+	if(nMapSong >= 0)
+	{
+		StopSong(nMapSong);
+		FreeSong(nMapSong);
+	}
+
+	nMapSong = LoadSong("world.it");
+	PlaySong(nMapSong);
+
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+	
+	nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+}
+
+void EnterFarm()
+{
+	Goto(152, 169, "farm.map");
+}
+
+void EnterTown()
+{
+	Goto(474, 650, "lerang.map");
+}
+
+void EnterDrolith()
+{
+	Goto(541, 610, "drolith.map");
+}
+
+void EnterDukonWest()
+{
+	Goto(60, 84, "dukon.map");
+}
+
+void EnterDukonEast()
+{
+	Goto(245, 142, "dukon.map");
+}
+
+void WestBattle()
+{
+	int rnd;
+
+	nBattleSteps--;
+	
+	if(nBattleSteps<=0)
+	{
+		rnd = random(1, 100);
+		if(rnd <= 75)
+		{
+			if(StartBattle(10, 0-1, 10, nParty[0], nParty[1], nParty[2], "gbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		else if(rnd <= 100)
+		{
+			if(StartBattle(10, 10, 10, nParty[0], nParty[1], nParty[2], "gbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	}
+}
+
+void EastBattle()
+{
+	int rnd;
+
+	
+	nBattleSteps--;
+	
+	if(nBattleSteps<=0)
+	{
+		rnd = random(1, 100);
+		if(rnd <= 50)
+		{
+			if(StartBattle(10, 10, 10, nParty[0], nParty[1], nParty[2], "gbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		else if(rnd <= 85)
+		{
+			if(StartBattle(10, 10, 10, nParty[0], nParty[1], nParty[2], "gbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		else if(rnd <= 100)
+		{
+			if(StartBattle(0-1, 11, 0-1, nParty[0], nParty[1], nParty[2], "gbkg.png", "battle.mod")!=0)
+			{
+				GameOver();
+			}
+		}
+		nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	}
+}

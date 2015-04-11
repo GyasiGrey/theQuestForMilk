@@ -1,0 +1,15 @@
+chr_version 5
+in king.pcx
+out king.chr
+frame_w 16
+frame_h 32
+frames_per_row 1
+frame_rows 1
+d_idle 0
+u_idle 0
+l_idle 0
+r_idle 0
+d_walk F0
+u_walk F0
+l_walk F0
+r_walk F0

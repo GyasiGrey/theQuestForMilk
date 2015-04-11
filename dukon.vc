@@ -1,0 +1,358 @@
+void start()
+{
+	if(nFlags[14])
+	{
+		entity.x[0] = 0;
+		entity.y[0] = 0;
+	}
+	
+	MapMusicSwitch("catacombs.it");
+
+	nPlayerEnt = EntitySpawn(0,0,"thush.chr");
+	SetPlayer(nPlayerEnt);
+	Warp(charx, chary);
+	nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+}
+
+void LeaveWest()
+{
+	Goto(220, 173, "world.map");
+}
+
+void LeaveEast()
+{
+	Goto(241, 174, "world.map");
+}
+
+void DukonGuard()
+{
+	int d;
+	int x;
+	int alea;
+	
+	if(nFlags[14])
+		return;
+		
+//	SetEntitiesPaused(1);
+	TextBox("Guard: No entry without a pass.");
+//	SetEntitiesPaused(0);
+	
+	if(nFlags[12])
+	{
+		sSceneName = "Inside Dukon";
+		
+		alea = EntitySpawn(entity.x[nPlayerEnt]/16, entity.y[nPlayerEnt]/16, "alea.chr");
+		EntityMove(alea, "D3R2");
+		while(entity.movecode[alea])
+		{
+			Render();
+			ShowPage();
+		}
+		entity.face[alea] = 1;
+//		SetEntitiesPaused(1);
+		TextBox(BatChars[0].sName + ": I don't have time for this.");
+		TextBox(BatChars[2].sName + ": Hold on " + BatChars[0].sName + " don't get too excited, let me handle it. I'm sure we're both sensible people and I can talk him into letting us through.");
+		
+		if(TextBoxQuestion("Let " + BatChars[2].sName + " handle it?", "", "", "", BatChars[2].sName + "?"))
+		{
+//			SetEntitiesPaused(0);
+			EntityMove(alea, "L2U3");
+			EntityMove(nPlayerEnt, "D3L2");
+			while(entity.movecode[alea] || entity.movecode[nPlayerEnt])
+			{
+				Render();
+				ShowPage();
+			}
+			entity.face[alea] = 1;
+			entity.face[nPlayerEnt] = 1;
+			
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[2].sName + ": Sir? If you would be so kind as to let us pass. We have urgent business with the Kingdom of Drolith.");
+			TextBox("Guard: Not my problem. No pass no entry.");
+			TextBox(BatChars[2].sName + ": But all of our cows, they were taken somehow and the only way we can find out what happened is if you let us through.");
+			TextBox("Guard: Like I said before. You're not getting through.");
+			TextBox(BatChars[0].sName + ": I don't think he's going to let us through.");
+			TextBox("Guard: He seems do get it, apparently you don't.");
+			TextBox(BatChars[2].sName + ": Grrrrrrr");
+			TextBox(BatChars[2].sName + ": Dark forces I summon thee Take those away that would do me harm And leave nothing but thin air in your wake");
+			
+			//DARK MAGIC EFFECT!
+			ShowPage();
+			
+			x=100;
+			for(d=0;d<100;d+=2)
+			{
+				SetLucent(x);
+				RectFill(0, 0, ImageWidth(screen), ImageHeight(screen), 0, screen);
+				SetLucent(d);
+				CircleFill(195, 60, d, d, RGB(100, 0, 100), screen);
+				ShowPage();
+				Wait(5);
+				x--;
+			}
+			
+			SetLucent(0);
+			
+			entity.x[0] = 0;
+			entity.y[0] = 0;
+			
+			FadeOut(0);
+			Wait(10);
+			FadeIn(50);
+			
+			TextBox(BatChars[0].sName + ": When did you learn to do that?!");
+			TextBox(BatChars[2].sName + ": Oh you know I've always had some latent magical abilities.");
+			TextBox(BatChars[0].sName + ": Yeah but....");
+			TextBox(BatChars[2].sName + ": Well.... we can pass now.");
+//			SetEntitiesPaused(0);
+			EntityMove(alea, "D3L2");
+			while(entity.movecode[alea])
+			{
+				Render();
+				ShowPage();
+			}
+			entity.x[alea]=0;
+			entity.y[alea]=0;
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[2].sName + " learned 'Banish'!");
+//			SetEntitiesPaused(0);
+			GetSkill(2, 18, 25);
+		}
+		else
+		{
+//			SetEntitiesPaused(1);
+			TextBox(BatChars[0].sName + ": I'll handle it my way.");
+			TextBox(BatChars[0].sName + ": Oh mister guard? You're not going to let us through?");
+			TextBox("Guard: No.");
+			TextBox(BatChars[0].sName + ": Well I have 5 reasons right here that might just change your mind.");
+			TextBox("*POW*");
+			
+			entity.x[0] = 60*16;
+			entity.y[0] = 73*16;
+
+			TextBox(BatChars[2].sName + ": Was all that necessary?");
+			TextBox(BatChars[0].sName + ": Yes.");
+//			SetEntitiesPaused(0);
+			
+			EntityMove(alea, "L2U3");
+			while(entity.movecode[alea])
+			{
+				Render();
+				ShowPage();
+			}
+			entity.x[alea]=0;
+			entity.y[alea]=0;
+		}
+			
+		nFlags[14] = 1;
+	}
+}
+
+void Warp1()
+{
+	Warp(89, 57);
+}
+
+void Warp1Rev()
+{
+	Warp(67, 46);
+}
+
+void Warp2()
+{
+	int boss;
+	int grd1, grd2, grd3, grd4;
+	
+	Warp(60, 100);
+	
+
+	if(!nFlags[37])
+	{
+		TextBox(BatChars[0].sName + ": For some reason I have a craving for chicken. I don't know why...");
+		nFlags[37] = 1;
+	}
+}
+
+void Warp2Rev()
+{
+	Warp(105, 77);
+}
+
+void NonRecoverySpring()
+{
+	TextBox(BatChars[0].sName + ": It's water...");
+	TextBox(BatChars[2].sName + ": What were you expecting, a recovery spring?");
+}
+
+void Battle()
+{
+	int rand;
+	
+	nBattleSteps--;
+
+	if(nBattleSteps<=0)
+	{
+		rand = Random(1, 100);
+		if(rand < 50)
+		{
+			if(StartBattle(10, 10, 10, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.s3m")!=0)
+			{
+				GameOver();
+			}
+		}
+		else
+		{
+			if(StartBattle(0-1, 11, 0-1, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.s3m")!=0)
+			{
+				GameOver();
+			}
+		}
+		nBattleSteps = Random(MIN_BAT_SEPS, MAX_BAT_SEPS);
+	}
+}
+
+void SuperBattle()
+{
+	if(StartBattle(10, 11, 10, nParty[0], nParty[1], nParty[2], "cbkg.png", "battle.s3m")!=0)
+	{
+		GameOver();
+	}
+	else
+	{
+		FadeOut(50);
+		Warp2();
+	}
+}
+
+void Treasure1()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[25])
+	{
+		GetItem(0, 2);
+		nFlags[25] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure2()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[26])
+	{
+		GetItem(2, 1);
+		nFlags[26] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure3()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[27])
+	{
+		GetItem(2, 1);
+		nFlags[27] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure4()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[38])
+	{
+		GetItem(2, 1);
+		nFlags[38] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure5()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[39])
+	{
+		GetItem(10, 1);
+		nFlags[39] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure6()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[40])
+	{
+		GetItem(5, 1);
+		nFlags[40] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
+
+void Treasure7()
+{
+	SetTile(event.tx, event.ty, 1, 131);
+	Render();
+	ShowPage();
+	if(!nFlags[41])
+	{
+		GetItem(1, 1);
+		nFlags[41] = 1;
+	}
+	else
+	{
+		TextBox(BatChars[0].sName + ": I've already taken everything");
+	}
+	SetTile(event.tx, event.ty, 1, 119);
+	Render();
+	ShowPage();
+}
